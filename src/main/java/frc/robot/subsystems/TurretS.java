@@ -387,9 +387,32 @@ public class TurretS extends SubsystemBase implements Loggable {
     return new RunCommand(()->this.setSpeed(speed.getAsDouble()), this);
   }
 
+  /**
+   * Creates a command that drives the turret to the angle supplied by the given DoubleSupplier
+   * @param angle
+   * @return
+   */
   public Command createFollowC(DoubleSupplier angle) {
     return (
       new RunCommand(()->this.setTurretAngle(new Rotation2d(angle.getAsDouble())), this)
+    );
+  }
+
+  /**
+   * Creates a command that minimizes the error externally supplied through the given DoubleSupplier.
+   * 
+   * Positive error means the turret should turn CCW
+   * @param error
+   * @return
+   */
+  public Command createMinimizeErrorC(DoubleSupplier error) {
+    return (
+      new RunCommand(()->this.setTurretAngle(
+        this.getRobotToTurretRotation()
+        .plus(
+          new Rotation2d(error.getAsDouble())
+        )), this
+      )
     );
   }
 }

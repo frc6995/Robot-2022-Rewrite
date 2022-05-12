@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -59,9 +60,10 @@ public class RobotContainer implements Loggable {
    */
   private void configureButtonBindings() {
     driverController.a().whenActive(turretS.createFollowC(()->Constants.SOFT_LIMIT_REVERSE_RADIAN));
-    driverController.b().whenActive(turretS.createFollowC(()->Math.PI));
+    driverController.b().whenActive(turretS.createMinimizeErrorC(()->{return turretS.getError(new Rotation2d(Math.PI));}));
     driverController.x().whenActive(turretS.createFollowC(()->Constants.SOFT_LIMIT_FORWARD_RADIAN));
-    driverController.y().whenActive(turretS.createFollowC(()->Units.degreesToRadians(180 + 360*driverController.getLeftX())));
+    
+    driverController.y().whenActive(turretS.getDefaultCommand());
   }
 
   /**
