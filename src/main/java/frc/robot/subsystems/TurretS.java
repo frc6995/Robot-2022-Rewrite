@@ -169,7 +169,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param speed The turn speed of the turret [-1..1]
    */
   public void setSpeed(double speed) {
-    setVelocity(speed * TURRET_MAX_SPEED);
+    setVelocityInternal(speed * TURRET_MAX_SPEED);
     turretPID.setGoal(getEncoderCounts()); //Keep the PID controller's goal following the actual mechanism
     // so that when using the PID, it starts moving away from the mech's actual position.
   }
@@ -220,8 +220,27 @@ public class TurretS extends SubsystemBase implements Loggable {
    * Commands the FeedForward to turn the motor at the specified velocity
    * @param velocity The target velocity in turret radians per second.
    */
+  private void setVelocityInternal(double velocity) {
+    setVoltageInternal(turretFF.calculate(velocity));
+  }
+
+  /**
+   * Drive the turret at a given velocity in radians per second.
+   * @param velocity
+   */
   public void setVelocity(double velocity) {
-    setVoltage(turretFF.calculate(velocity));
+    setVelocityInternal(velocity);
+    // Update the PID goal whenever we're moving the turret outside the control of the PID.
+    turretPID.setGoal(getEncoderCounts()); 
+  }
+  
+
+  /**
+   * Sets raw voltage to the turret motor.
+   * @param voltage
+   */
+  private void setVoltageInternal(double voltage) {
+    sparkMax.setVoltage(voltage);
   }
 
   /**
@@ -229,7 +248,9 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param voltage
    */
   public void setVoltage(double voltage) {
-    sparkMax.setVoltage(voltage);
+    setVoltageInternal(voltage);
+    // Update the PID goal whenever we're moving the turret outside the control of the PID.
+    turretPID.setGoal(getEncoderCounts());
   }
 
   /**
@@ -291,13 +312,15 @@ public class TurretS extends SubsystemBase implements Loggable {
     double targetPosition = NomadMathUtil.modulus(target);
     // Set the new goal of the PID to this adjusted target.
     turretPID.setGoal(targetPosition);
+
+    
     // If we are within the position and velocity acceptable range,
     if(turretPID.atGoal()) {
-      setVoltage(0); // Just shut off the motor so we don't get micro-oscillations.
+      setVoltageInternal(0); // Just shut off the motor so we don't get micro-oscillations.
     }
     else {
       // Otherwise, run the PID controller and command the output velocity.
-      setVelocity(turretPID.calculate(getEncoderCounts()));
+      setVelocityInternal(turretPID.calculate(getEncoderCounts()));
     }
   }
 
