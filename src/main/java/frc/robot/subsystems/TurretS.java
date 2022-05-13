@@ -31,21 +31,28 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.EntryNotification;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import frc.robot.Constants;
 import frc.robot.util.CANEncoderSim;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.Logger;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -74,7 +81,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * 
    */
-  private ProfiledPIDController turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(Math.PI, 2*Math.PI));
+  private ProfiledPIDController turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(2*Math.PI, 6*Math.PI));
 
   /**
    * Set up a SimEncoder to store the position and velocity of the mechanism as output by the simulator. 
@@ -115,6 +122,8 @@ public class TurretS extends SubsystemBase implements Loggable {
    */
   private double pidVelocity = 0;
 
+  NetworkButton turretResetNetworkButton;
+
   /** Creates a new TurretS. */
   public TurretS() {
     sparkMax.restoreFactoryDefaults();
@@ -133,11 +142,28 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.setIdleMode(IdleMode.kBrake);
     sparkMax.setSmartCurrentLimit(20, 20, 0);
     
-    SmartDashboard.putBoolean("requestTurrReset", false);
     // When starting up, we want the encoder to read pi radians (180 deg) offset from the "forward" direction of the bot.
     resetEncoder();
     // We want the PID controller to default to holding that starting position.
     turretPID.setGoal(getEncoderCounts());
+
+    // Set up logging that can't easily be done with the @Log annotation
+    Shuffleboard.getTab("TurretS").addNumber("Tgt", ()->turretPID.getGoal().position);
+    Shuffleboard.getTab("TurretS").addNumber("Setpos", ()->turretPID.getSetpoint().position);
+    Shuffleboard.getTab("TurretS").addNumber("Setvel", ()->turretPID.getSetpoint().velocity);
+    /**
+     * Set up an encoder reset bound to a Network Tables boolean value.
+     */
+    Shuffleboard.getTab("TurretS")
+    .add("requestTurrReset", false) //Add the boolean to Shuffleboard.
+    .getEntry()
+    .addListener((notif)->{ // Add a listener for changes to the value.
+      if(notif.value.getBoolean()) { // If the value changes to true, 
+        resetEncoder(); // reset encoder
+      }
+    }, 0);
+
+
   }
 
   /**
@@ -344,7 +370,6 @@ public class TurretS extends SubsystemBase implements Loggable {
     // Position delta velocity calculation. Velocity is distance over time,
     // so we measure the change in position over the last 0.02 s.
     double newVelocity = (newPosition - getEncoderCounts()) / 0.02;
-    SmartDashboard.putNumber("simVelo", newVelocity);
 
     turretSimEncoder.setPosition(newPosition); //Set the simulated encoder that the rest of the subsystem reads
     // so it can work off of the adjusted value for the next update.
@@ -383,14 +408,6 @@ public class TurretS extends SubsystemBase implements Loggable {
   
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("turret/Tgt", turretPID.getGoal().position);
-    SmartDashboard.putNumber("turret/Setpos", turretPID.getSetpoint().position);
-    SmartDashboard.putNumber("turret/Setvel", turretPID.getSetpoint().velocity);
-
-    if(SmartDashboard.getBoolean("requestTurrReset", false)){
-      resetEncoder(Math.PI);
-      SmartDashboard.putBoolean("requestTurrReset", false);
-    }
   }
 
 
