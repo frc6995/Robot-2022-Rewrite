@@ -57,7 +57,6 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Noah Kim
  */
 public class TurretS extends SubsystemBase implements Loggable {
-  @Log(methodName = "getAppliedOutput")
   private CANSparkMax sparkMax = new CANSparkMax(CAN_ID_TURRET, MotorType.kBrushless);
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
 
@@ -223,13 +222,6 @@ public class TurretS extends SubsystemBase implements Loggable {
     setVoltage(turretFF.calculate(velocity));
   }
 
-  /**
-   * Commands the FeedForward to turn the motor at the specified velocity
-   * @param velocity The target velocity in turret radians per second.
-   */
-  private void setVelocity(double velocity, double acceleration) {
-    setVoltage(turretFF.calculate(velocity, acceleration));
-  }
 
   /**
    * Sets raw voltage to the turret motor.
@@ -364,7 +356,6 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param target
    * @return
    */
-  @Log
   public double getError(Rotation2d target) {
     return target.minus(getRobotToTurretRotation()).getRadians();
   }
@@ -374,7 +365,6 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return True if the turret is at the target angle
    */
-  @Log
   public boolean isAtTarget(Rotation2d target) {
     return Math.abs(getError(target)) < Constants.TURRET_PID_ERROR;
   }
@@ -404,7 +394,10 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
 
-  /* COMMANDS */
+  /* COMMANDS
+    Though an argument can be made that the subsystem should not manage its own commands, we expose the subsystem's
+    actions as simple commands here.
+  */
 
   public Command createManualC(DoubleSupplier speed) {
     return new RunEndCommand(()->this.setSpeed(speed.getAsDouble()), this::resetPID, this);
