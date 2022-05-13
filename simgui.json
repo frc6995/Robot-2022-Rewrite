@@ -13,18 +13,36 @@
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/TurretS": "Subsystem",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
-      "/LiveWindow/Ungrouped/Scheduler": "Scheduler"
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/Shuffleboard/RobotContainer/field": "Field2d"
+    },
+    "windows": {
+      "/Shuffleboard/RobotContainer/field": {
+        "turret": {
+          "length": 3.0,
+          "width": 0.30000001192092896
+        },
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables": {
     "Shuffleboard": {
+      "DrivebaseS": {
+        "open": true
+      },
       "TurretS": {
         "open": true
       },
       "open": true
     },
     "SmartDashboard": {
-      "open": true
+      "open": true,
+      "turret": {
+        "open": true
+      }
     }
   },
   "Plot": {
@@ -36,7 +54,7 @@
               "autoFit": true
             }
           ],
-          "height": 356,
+          "height": 500,
           "series": [
             {
               "color": [
@@ -49,30 +67,39 @@
             },
             {
               "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turretTgt"
+              "id": "NT:/SmartDashboard/turret/Setvel"
             },
             {
               "color": [
-                0.7686275243759155,
-                0.30588236451148987,
+                0.8666667342185974,
+                0.5176470875740051,
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turretPos"
+              "id": "NT:/Shuffleboard/TurretS/sparkMax"
             },
             {
               "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/turretPidVelo"
+              "id": "NT:/Shuffleboard/TurretS/turretVelocity"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/turret/Setpos"
             }
           ]
         }
@@ -95,7 +122,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/TurretS/sparkMax"
+              "id": "SPARK MAX [30]-Velocity"
             },
             {
               "color": [
@@ -104,7 +131,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "SPARK MAX [30]-Velocity"
+              "id": "SPARK MAX [30]-Applied Output"
             }
           ]
         }

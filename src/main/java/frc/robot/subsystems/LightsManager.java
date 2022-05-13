@@ -10,16 +10,16 @@ import java.util.TreeSet;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import frc.robot.Constants;
 
-public class LightS {
+public class LightsManager {
 
-  private static LightS m_instance = new LightS();
+  private static LightsManager m_instance = new LightsManager();
   private Spark spark = new Spark(Constants.PWM_PORT_LED);
 
   /** Creates a new LedS. */
-  private LightS() {
+  private LightsManager() {
   }
 
-  public static LightS getInstance() {
+  public static LightsManager getInstance() {
       return m_instance;
   }
 
