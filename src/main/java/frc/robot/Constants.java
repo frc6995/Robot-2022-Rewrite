@@ -196,7 +196,7 @@ public final class Constants {
                                                                         // second
 
   /** Proportional term for the turret */
-  public static final double TURRET_P = 6;// 51.463;
+  public static final double TURRET_P = 0.8;// 51.463;
 
   /** Derivative term for the turret */
   public static final double TURRET_D = 1.9948;

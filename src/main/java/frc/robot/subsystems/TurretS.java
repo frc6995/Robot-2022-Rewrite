@@ -44,6 +44,7 @@ import frc.robot.Constants;
 import frc.robot.util.CANEncoderSim;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
+import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -169,9 +170,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param speed The turn speed of the turret [-1..1]
    */
   public void setSpeed(double speed) {
-    setVelocityInternal(speed * TURRET_MAX_SPEED);
-    turretPID.setGoal(getEncoderCounts()); //Keep the PID controller's goal following the actual mechanism
-    // so that when using the PID, it starts moving away from the mech's actual position.
+    setVelocity(speed * TURRET_MAX_SPEED);
   }
 
   /**
@@ -220,37 +219,24 @@ public class TurretS extends SubsystemBase implements Loggable {
    * Commands the FeedForward to turn the motor at the specified velocity
    * @param velocity The target velocity in turret radians per second.
    */
-  private void setVelocityInternal(double velocity) {
-    setVoltageInternal(turretFF.calculate(velocity));
+  private void setVelocity(double velocity) {
+    setVoltage(turretFF.calculate(velocity));
   }
 
   /**
-   * Drive the turret at a given velocity in radians per second.
-   * @param velocity
+   * Commands the FeedForward to turn the motor at the specified velocity
+   * @param velocity The target velocity in turret radians per second.
    */
-  public void setVelocity(double velocity) {
-    setVelocityInternal(velocity);
-    // Update the PID goal whenever we're moving the turret outside the control of the PID.
-    turretPID.setGoal(getEncoderCounts()); 
+  private void setVelocity(double velocity, double acceleration) {
+    setVoltage(turretFF.calculate(velocity, acceleration));
   }
-  
 
   /**
    * Sets raw voltage to the turret motor.
    * @param voltage
    */
-  private void setVoltageInternal(double voltage) {
+  private void setVoltage(double voltage) {
     sparkMax.setVoltage(voltage);
-  }
-
-  /**
-   * Sets raw voltage to the turret motor.
-   * @param voltage
-   */
-  public void setVoltage(double voltage) {
-    setVoltageInternal(voltage);
-    // Update the PID goal whenever we're moving the turret outside the control of the PID.
-    turretPID.setGoal(getEncoderCounts());
   }
 
   /**
@@ -316,11 +302,13 @@ public class TurretS extends SubsystemBase implements Loggable {
     
     // If we are within the position and velocity acceptable range,
     if(turretPID.atGoal()) {
-      setVoltageInternal(0); // Just shut off the motor so we don't get micro-oscillations.
+      setVoltage(0); // Just shut off the motor so we don't get micro-oscillations.
     }
     else {
       // Otherwise, run the PID controller and command the output velocity.
-      setVelocityInternal(turretPID.calculate(getEncoderCounts()));
+      pidVelocity = turretPID.calculate(getEncoderCounts());
+      setVelocity(pidVelocity + turretPID.getSetpoint().velocity);
+      // The PID is tuned quite low because the feedforward does most of the work of tracking the setpoint's velocity.
     }
   }
 
@@ -390,12 +378,24 @@ public class TurretS extends SubsystemBase implements Loggable {
   public boolean isAtTarget(Rotation2d target) {
     return Math.abs(getError(target)) < Constants.TURRET_PID_ERROR;
   }
+
+  /**
+   * Resets the PID controller. Called before the controller begins being used.
+   * 
+   * The controller requires that `calculate()` be called once every loop 
+   * in order to get correct data for the derivative term. By resetting
+   * just before using the values, we can correct for a long gap without calculating 
+   * (e.g. when in manual control)
+   */
+  public void resetPID() {
+    turretPID.reset(getEncoderCounts(), getVelocity());
+  }
   
   @Override
   public void periodic() {
-    // Constantly update the output of the turret pid, even if we're doing manual control at the
-    pidVelocity = turretPID.calculate(getEncoderCounts());
-    SmartDashboard.putNumber("turretTgt", turretPID.getGoal().position);
+    SmartDashboard.putNumber("turret/Tgt", turretPID.getGoal().position);
+    SmartDashboard.putNumber("turret/Setpos", turretPID.getSetpoint().position);
+    SmartDashboard.putNumber("turret/Setvel", turretPID.getSetpoint().velocity);
 
     if(SmartDashboard.getBoolean("requestTurrReset", false)){
       resetEncoder(Math.PI);
@@ -407,7 +407,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   /* COMMANDS */
 
   public Command createManualC(DoubleSupplier speed) {
-    return new RunCommand(()->this.setSpeed(speed.getAsDouble()), this);
+    return new RunEndCommand(()->this.setSpeed(speed.getAsDouble()), this::resetPID, this);
   }
 
   /**
@@ -429,13 +429,8 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @return
    */
   public Command createMinimizeErrorC(DoubleSupplier error) {
-    return (
-      new RunCommand(()->this.setTurretAngle(
-        this.getRobotToTurretRotation()
-        .plus(
-          new Rotation2d(error.getAsDouble())
-        )), this
-      )
-    );
+    return createFollowC(()->(
+        this.getEncoderCounts()+error.getAsDouble())
+      );
   }
 }
