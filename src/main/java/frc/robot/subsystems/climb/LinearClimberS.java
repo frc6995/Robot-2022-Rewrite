@@ -10,8 +10,12 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -19,9 +23,7 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   private CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_CLIMBER_MOTOR, MotorType.kBrushless);
   @Log(methodName = "getPosition", name = "frontPosition")
   private RelativeEncoder sparkMaxEncoder = frontSparkMax.getEncoder();
-  
-  private double minimumLimit = Constants.CLIMBER_FRONT_SOFT_LIMIT_BACK;
-  private double maximumLimit = Constants.CLIMBER_FRONT_SOFT_LIMIT_FORWARD;
+
   /** Creates a new ClimberS. */
   public LinearClimberS() {
     
@@ -43,7 +45,7 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
     frontSparkMax.setVoltage(voltage);
   }
 
-  public void driveFrontTransfer() {
+  public void transferFront() {
     driveFront(Constants.CLIMBER_FRONT_TRANSFER_VOLTS);
   }
   
@@ -62,6 +64,7 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   public void holdFront() {
     driveFront(0.5);
   }
+
   @Override
   public void periodic() {
   }

@@ -5,9 +5,7 @@ import static frc.robot.Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION;
 import static frc.robot.Constants.SOFT_LIMIT_FORWARD_RADIAN;
 import static frc.robot.Constants.SOFT_LIMIT_REVERSE_RADIAN;
 import static frc.robot.Constants.TURRET_D;
-import static frc.robot.Constants.TURRET_DEADBAND;
 import static frc.robot.Constants.TURRET_FF;
-import static frc.robot.Constants.TURRET_LIMIT_SWITCH_PORT;
 import static frc.robot.Constants.TURRET_MAX_SPEED;
 import static frc.robot.Constants.TURRET_P;
 import static frc.robot.Constants.TURRET_PID_ERROR;
@@ -20,7 +18,6 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -31,28 +28,19 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.EntryNotification;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTableValue;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import frc.robot.Constants;
-import frc.robot.util.CANEncoderSim;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.Logger;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -416,7 +404,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     actions as simple commands here.
   */
 
-  public Command createManualC(DoubleSupplier speed) {
+  public Command manualC(DoubleSupplier speed) {
     return new RunEndCommand(()->this.setSpeed(speed.getAsDouble()), this::resetPID, this);
   }
 
@@ -425,7 +413,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param angle
    * @return
    */
-  public Command createFollowC(DoubleSupplier angle) {
+  public Command turnAngleC(DoubleSupplier angle) {
     return (
       new RunCommand(()->this.setTurretAngle(new Rotation2d(angle.getAsDouble())), this)
     );
@@ -438,8 +426,8 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param error
    * @return
    */
-  public Command createMinimizeErrorC(DoubleSupplier error) {
-    return createFollowC(()->(
+  public Command zeroErrorC(DoubleSupplier error) {
+    return turnAngleC(()->(
         this.getEncoderCounts()+error.getAsDouble())
       );
   }

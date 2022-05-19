@@ -1,24 +1,30 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.CAN_ID_BACK_SHOOTER_MOTOR;
+import static frc.robot.Constants.CAN_ID_FRONT_SHOOTER_MOTOR;
+import static frc.robot.Constants.SHOOTER_BACK_FF;
+import static frc.robot.Constants.SHOOTER_FRONT_FF;
+
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LightsManager.States;
 import frc.robot.util.SimEncoder;
-
-import static frc.robot.Constants.*;
+import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -62,8 +68,6 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public ShooterS() {
     frontSparkMax.restoreFactoryDefaults();
     backSparkMax.restoreFactoryDefaults();
-    frontSparkMax.setClosedLoopRampRate(6);
-    backSparkMax.setClosedLoopRampRate(6);
     frontSparkMax.setSmartCurrentLimit(20, 30, 0);
     backSparkMax.setSmartCurrentLimit(20, 30, 0);
 
@@ -179,9 +183,13 @@ public class ShooterS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
-    if(getFrontEncoderSpeed() > 100 && getBackEncoderSpeed() > 100) {
+    if(isMoving()) {
       LightsManager.getInstance().requestState(States.Shooting);
     }
+  }
+
+  public boolean isMoving() {
+    return getFrontEncoderSpeed() > 100 && getBackEncoderSpeed() > 100;
   }
 
   @Override
@@ -196,5 +204,28 @@ public class ShooterS extends SubsystemBase implements Loggable {
 
     frontSimEncoder.setVelocity(frontSim.getAngularVelocityRPM());
     backSimEncoder.setVelocity(backSim.getAngularVelocityRPM());
+  }
+
+  public Command spinVelocityC(DoubleSupplier frontVelocityRPM, DoubleSupplier backVelocityRPM) {
+    return new RunCommand(
+      ()->{
+        this.setFrontVelocity(
+          frontVelocityRPM.getAsDouble()
+        );
+        this.setBackVelocity(
+          backVelocityRPM.getAsDouble()
+        );
+      }, this);
+  }
+
+  public Command spinDistanceC(DoubleSupplier distance) {
+    return spinVelocityC(
+      () -> ShooterInterpolatingTable.get(distance.getAsDouble()).frontWheelRpm,
+      () -> ShooterInterpolatingTable.get(distance.getAsDouble()).backWheelRpm
+    );
+  }
+
+  public Command stopC() {
+    return new InstantCommand(this::stop, this);
   }
 }

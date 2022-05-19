@@ -53,7 +53,7 @@ public class RobotContainer implements Loggable {
   }
 
   private void createCommands() {
-    turretS.setDefaultCommand(turretS.createManualC(driverController::getRightX));
+    turretS.setDefaultCommand(turretS.manualC(driverController::getRightX));
     drivebaseS.setDefaultCommand(
       drivebaseS.createCurvatureDriveC(
         ()-> -driverController.getLeftY(),
@@ -78,13 +78,13 @@ public class RobotContainer implements Loggable {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whenActive(turretS.createFollowC(()->{
+    driverController.a().whenActive(turretS.turnAngleC(()->{
       return NomadMathUtil.getDirection(new Transform2d(drivebaseS.getRobotPose(), Trajectories.HUB_CENTER_POSE)).getRadians();
     }));
-    driverController.b().whenActive(turretS.createMinimizeErrorC(()->{return turretS.getError(new Rotation2d(Math.PI));}));
-    driverController.x().whenActive(turretS.createFollowC(()->3*Math.PI/2));
+    driverController.b().whenActive(turretS.zeroErrorC(()->{return turretS.getError(new Rotation2d(Math.PI));}));
+    driverController.x().whenActive(turretS.turnAngleC(()->3*Math.PI/2));
     
-    driverController.y().whenActive(turretS.createFollowC(()->{return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));}));
+    driverController.y().whenActive(turretS.turnAngleC(()->{return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));}));
   }
 
   /**

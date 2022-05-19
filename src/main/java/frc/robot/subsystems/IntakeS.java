@@ -98,7 +98,7 @@ public class IntakeS extends SubsystemBase implements Loggable {
      * Returns a RunCommand that spins the intake and stops it on command end.
      * @return the spin command.
      */
-    public Command createSpinC() {
+    public Command spinC() {
         return new RunEndCommand(this::spin, this::stop, this);
     }
 
@@ -106,7 +106,7 @@ public class IntakeS extends SubsystemBase implements Loggable {
      * Returns a RunCommand that deploys the intake.
      * @return the deploy command.
      */
-    public Command createDeployC() {
+    public Command deployC() {
         return new RunCommand(this::deploy, this);
     }
 
@@ -114,7 +114,7 @@ public class IntakeS extends SubsystemBase implements Loggable {
      * Returns a RunCommand that deploys the intake.
      * @return the deploy command.
      */
-    public Command createRetractC() {
+    public Command retractC() {
         return new RunCommand(this::retract, this);
     }
 

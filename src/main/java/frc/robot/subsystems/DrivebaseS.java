@@ -18,12 +18,15 @@ import static frc.robot.Constants.DRIVEBASE_TRACKWIDTH;
 import static frc.robot.Constants.DRIVEBASE_TURN_SLEW_LIMIT;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.hal.SimDouble;
+import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
@@ -44,6 +47,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -179,12 +183,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    */
   @Log(methodName = "getRadians", name = "gyroHeading")
   public Rotation2d getGyroHeading() {
-    if(RobotBase.isReal()) {
       return navX.getRotation2d();
-    }
-    else {
-      return m_driveSim.getHeading();
-    }
   }
 
   /**
@@ -283,6 +282,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 		m_leftEncoder.setVelocity(m_driveSim.getLeftVelocityMetersPerSecond());
 		m_rightEncoder.setPosition(m_driveSim.getRightPositionMeters());
 		m_rightEncoder.setVelocity(m_driveSim.getRightVelocityMetersPerSecond());
+    setSimGyro(m_driveSim.getHeading().getRadians());
 	}
 
   /**
@@ -396,6 +396,17 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backRight.setIdleMode(mode);
   }
 
+  /**
+   * Sets the yaw of the navX in sim.
+   * 
+   * @param newState The radians value of the sim heading.
+   * 
+   */
+  public void setSimGyro(double newState) {
+    int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
+    SimDouble gyroSimAngle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
+    gyroSimAngle.set(-Units.radiansToDegrees(newState));
+  }
 
   /*COMMANDS*/
 
@@ -420,7 +431,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
 
-  public Command createTimedDriveC(double power, double time) {
+  public Command timedDriveC(double power, double time) {
     return new RunEndCommand(
       () -> {
           this.tankDrive(power, power);
@@ -431,7 +442,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
             .withName("DriveTimedC");
   }
 
-  public Command createRamseteC(Trajectory trajectory) {
+  public Command ramseteC(Trajectory trajectory) {
     return new RamseteCommand(
         trajectory,
         this::getRobotPose,
@@ -439,6 +450,21 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
         Constants.DRIVEBASE_KINEMATICS,
         this::tankDriveVelocity,
         this
-      ).andThen(()->this.tankDrive(0, 0), this);
+      ).andThen(stopC());
+  }
+
+  public Command stopC() {
+    return new InstantCommand(this::stopAll, this);
+  }
+
+  /**
+   * Resets the odometry to the pose supplied by the given PoseSupplier.
+   * 
+   * We use a Supplier because the starting pose may not be known until runtime.
+   * @param poseSupplier A supplier for the new pose.
+   * @return The InstantCommand that resets the odometry.
+   */
+  public Command resetOdometryC(Supplier<Pose2d> poseSupplier) {
+    return new InstantCommand(()->resetRobotPose(poseSupplier.get()));
   }
 }

@@ -4,8 +4,21 @@
 
 package frc.robot.subsystems.climb;
 
+import java.util.function.BooleanSupplier;
+
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.LightsManager;
+import frc.robot.subsystems.LightsManager.States;
+import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
+
+import static frc.robot.util.command.CommandUtil.errorC;
 
 public class SuperClimberS implements Loggable {
 
@@ -33,52 +46,66 @@ public class SuperClimberS implements Loggable {
     return locked;
   }
 
-  public void extendBack() {
-    thriftyClimberS.extendBack();
+  public Command transferBackC() {
+    return errorClimberC(
+      new RunEndCommand(thriftyClimberS::transferBack, thriftyClimberS::stopBack, thriftyClimberS)
+    );
   }
 
-  public void retractBack() {
-    thriftyClimberS.retractBack();
+  public Command extendBackC() {
+    return errorClimberC(
+      new RunEndCommand(thriftyClimberS::extendBack, thriftyClimberS::stopBack, thriftyClimberS)
+    );
   }
 
-  public void stopBack() {
-    thriftyClimberS.stopBack();
+  public Command retractBackC() {
+    return new RunEndCommand(thriftyClimberS::retractBack, thriftyClimberS::stopBack, thriftyClimberS);
   }
 
-  public void holdBack() {
-    thriftyClimberS.holdBack();
+  public Command stopBackC() { // We can skip the error check if we're just stopping it.
+    return new InstantCommand(thriftyClimberS::stopBack, thriftyClimberS);
   }
 
-  public void transferBack() {
-    thriftyClimberS.driveBackTransfer();
+  // Front Linear Climber  
+  public Command transferFrontC() {
+    return errorClimberC(
+      new RunEndCommand(linearClimberS::transferFront, linearClimberS::stopFront, linearClimberS)
+    );
   }
 
-  public void transferFront() {
-    linearClimberS.driveFrontTransfer();
-  }
-  public void extendFront() {
-    linearClimberS.extendFront();
-  }
-
-  public void retractFront() {
-    linearClimberS.retractFront();
+  public Command extendFrontC() {
+    return errorClimberC(
+      new RunEndCommand(linearClimberS::extendFront, linearClimberS::stopFront, linearClimberS)
+    );
   }
 
-  public void stopFront() {
-    linearClimberS.stopFront();
+  public Command retractFrontC() {
+    return new RunEndCommand(linearClimberS::retractFront, linearClimberS::stopFront, linearClimberS);
+  }
+  public Command stopFrontC() {
+    return new InstantCommand(linearClimberS::stopFront, linearClimberS);
   }
 
-  public void tiltForward() {
-    tiltClimberS.tiltForward();
+  public Command tiltForwardC() {
+    return errorClimberC(new RunEndCommand(tiltClimberS::tiltForward, tiltClimberS::tiltStop, tiltClimberS));
   }
 
-  public void tiltBackward() {
-    tiltClimberS.tiltBackward();
+  public Command tiltBackC() {
+    return errorClimberC(new RunEndCommand(tiltClimberS::tiltBack, tiltClimberS::tiltStop, tiltClimberS));
   }
 
-  public void tiltStop() {
-    tiltClimberS.tiltStop();
+  public Command tiltStopC() {
+    return new InstantCommand(tiltClimberS::tiltStop, tiltClimberS);
   }
 
-  
+  private Command errorClimberC(Command attemptCommand) {
+    return errorC(
+      attemptCommand,
+      new RunCommand(
+        ()->
+          LightsManager.getInstance().requestState(States.Error)
+      ).withTimeout(0.5),
+      this::getIsLocked
+    );
+  }
 }

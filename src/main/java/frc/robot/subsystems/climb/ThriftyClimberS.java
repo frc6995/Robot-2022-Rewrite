@@ -10,8 +10,11 @@ import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -44,31 +47,24 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
     backSparkMax.setVoltage(voltage);
   }
 
-  public void driveBackTransfer() {
+  public void transferBack() {
     driveBack(Constants.CLIMBER_BACK_TRANSFER_VOLTS);
-  }
-  public void setMinimumLimit(double minimumLimit) {
-    this.minimumLimit = minimumLimit;
-  }
-
-  public void setMaximumLimit(double maximumLimit) {
-    this.maximumLimit = maximumLimit;
   }
 
   public void extendBack() {
-    backSparkMax.setVoltage(10);
+    driveBack(10);
   }
 
   public void retractBack() {
-    backSparkMax.setVoltage(-10);
+    driveBack(-10);
   }
 
   public void stopBack() {
-    backSparkMax.setVoltage(0);
+    driveBack(0);
   }
 
   public void holdBack() {
-    backSparkMax.setVoltage(Constants.CLIMBER_BACK_HOLDING_FF);
+    driveBack(Constants.CLIMBER_BACK_HOLDING_FF);
   }
   
   @Override

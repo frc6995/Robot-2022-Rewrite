@@ -96,18 +96,18 @@ public final class Constants {
    */
   public static final double[] DRIVEBASE_LINEAR_FF_MPS = { 0.034258,
       2.0657,
-      0.60947 }; // TODO real numbers
+      0.60947 };
 
   /**
    * The feedforward constants for rotation while driving.
    */
   public static final double[] DRIVEBASE_ANGULAR_FF = { 0.034258, 2.0657,
-      0.2605 }; // TODO real numbers
+      0.2605 };
 
   /**
    * The proportional constant for the drivebase wheel.
    */
-  public static final double DRIVEBASE_P = 8.6995;// 0.72534;//9.5653; // TODO real numbers
+  public static final double DRIVEBASE_P = 8.6995;// 0.72534;//9.5653;
 
   /**
    * The system modeling plant for the drivebase.
