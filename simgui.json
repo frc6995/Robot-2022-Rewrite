@@ -30,7 +30,16 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
-      "DrivebaseS": {
+      "SuperClimberS": {
+        "LinearClimberS": {
+          "open": true
+        },
+        "ThriftyClimberS": {
+          "open": true
+        },
+        "TiltClimberS": {
+          "open": true
+        },
         "open": true
       },
       "TurretS": {

@@ -65,7 +65,6 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
     brake();
     frontSparkMax.setSmartCurrentLimit(40, 40, 0);
     frontSparkMax.burnFlash();
-    setDefaultCommand(stopFrontC());
   }
 
   /** @return the climber position in motor rotations */

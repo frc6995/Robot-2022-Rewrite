@@ -27,10 +27,13 @@ public class SuperClimberS implements Loggable {
   
   /** Creates a new ClimberS. */
   public SuperClimberS() {
+    // We make the default commands perpetual,
+    // overriding isFinished to never end unless interrupted.
+    // Default commands are not allowed to end naturally.
     // When movement commands for each subsystem end, the default is to stop the actuators.
-    thriftyClimberS.setDefaultCommand(stopBackC());
-    linearClimberS.setDefaultCommand(stopFrontC());
-    tiltClimberS.setDefaultCommand(stopTiltC());
+    thriftyClimberS.setDefaultCommand(stopBackC().perpetually());
+    linearClimberS.setDefaultCommand(stopFrontC().perpetually());
+    tiltClimberS.setDefaultCommand(stopTiltC().perpetually());
   }
 
   /**

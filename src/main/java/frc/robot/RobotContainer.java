@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.auto.Trajectories;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.TurretS;
+import frc.robot.subsystems.climb.SuperClimberS;
 import frc.robot.util.NomadMathUtil;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -32,6 +33,7 @@ public class RobotContainer implements Loggable {
 
   // The robot's subsystems and commands are defined here...
   TurretS turretS;
+  SuperClimberS superClimberS;
   DrivebaseS drivebaseS;
 
   // The simulated field
@@ -49,6 +51,7 @@ public class RobotContainer implements Loggable {
 
   private void createSubsystems() {
     turretS = new TurretS();
+    superClimberS = new SuperClimberS();
     drivebaseS = new DrivebaseS();
   }
 
