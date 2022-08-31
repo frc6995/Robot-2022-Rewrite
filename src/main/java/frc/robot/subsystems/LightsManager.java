@@ -12,10 +12,35 @@ import frc.robot.Constants;
 
 public class LightsManager {
 
-  private static LightsManager m_instance = new LightsManager();
-  private Spark spark = new Spark(Constants.PWM_PORT_LED);
+    //===INTERNAL CONSTANTS===
 
-  /** Creates a new LedS. */
+    /** The roboRIO spark value for solid green LEDs */
+    public static final double LED_SOLID_GREEN = 0.77;
+
+    /** The roboRIO spark value for Light Chase pattern */
+    public static final double LED_PATTERN_GREEN = 0.01;
+  
+    /** The roboRIO spark value for Strobe, Red pattern */
+    public static final double LED_PATTERN_RED = -0.11;
+  
+    /** The roboRIO spark value for Rainbow, Party Palette pattern */
+    public static final double LED_PARTY_MODE = -0.97;
+  
+    public static final double LED_GOLD_SOLID = 0.67;
+  
+    public static final double LED_GREEN_RAINBOW = -0.91;
+  
+    public static final double LED_LARSON_SCANNER = -0.01;
+  
+    public static final double LED_CONFETTI_MODE = -0.87;
+  
+    public static final int PWM_PORT_LED = Constants.PWM_PORT_LED;
+
+
+  private static LightsManager m_instance = new LightsManager();
+  private Spark spark = new Spark(PWM_PORT_LED);
+
+  /** Creates a new LightsManager. */
   private LightsManager() {
   }
 
@@ -27,18 +52,18 @@ public class LightsManager {
 
 
   /**
-   * Different states of the robot, with an integer that determines the priority
-   * of the state (the lower the number, the higher the priority)
+   * Different states of the robot. Their order top-to-bottom corresponds to their priority
+   * and their ordering in the TreeSet. Each state has a corresponding PWM value for the Blinkin.
    */
   public static enum States {
-    Disabled(Constants.LED_SOLID_GREEN), // set in robotPeriodic
-    Error(Constants.LED_PATTERN_RED),
-    Climbing(Constants.LED_PARTY_MODE), // set through triggers in RobotContainer
-    ShooterAndDistanceReady(Constants.LED_GOLD_SOLID), // ditto
-    ShooterReady(Constants.LED_GREEN_RAINBOW), // ditto
-    Shooting(Constants.LED_PATTERN_GREEN), //ditto
-    Intaking(Constants.LED_PATTERN_GREEN), // set from MainCommandFactory.createIntakeCG`
-    Default(Constants.LED_SOLID_GREEN);
+    Disabled(LED_SOLID_GREEN), // set in robotPeriodic
+    Error(LED_PATTERN_RED),
+    Climbing(LED_PARTY_MODE), // set through triggers in RobotContainer
+    ShooterAndDistanceReady(LED_GOLD_SOLID), // ditto
+    ShooterReady(LED_GREEN_RAINBOW), // ditto
+    Shooting(LED_PATTERN_GREEN), //ditto
+    Intaking(LED_PATTERN_GREEN), // set from MainCommandFactory.createIntakeCG`
+    Default(LED_SOLID_GREEN);
 
     public final double lightSpeed;
 
@@ -47,8 +72,6 @@ public class LightsManager {
     }
   }
 
-  // currentStates = {Disabled, Climbing, EjectingWrongColor, Intaking, Shooting,
-  // Default}
 
   /**
    * Requests the current state of the robot, determines whether the requested
