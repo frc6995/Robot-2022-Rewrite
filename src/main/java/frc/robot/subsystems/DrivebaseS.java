@@ -4,18 +4,6 @@ import static frc.robot.Constants.CAN_ID_BACK_LEFT_DRIVE_MOTOR;
 import static frc.robot.Constants.CAN_ID_BACK_RIGHT_DRIVE_MOTOR;
 import static frc.robot.Constants.CAN_ID_FRONT_LEFT_DRIVE_MOTOR;
 import static frc.robot.Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR;
-import static frc.robot.Constants.DRIVEBASE_DEADBAND;
-import static frc.robot.Constants.DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
-import static frc.robot.Constants.DRIVEBASE_FWD_BACK_SLEW_LIMIT;
-import static frc.robot.Constants.DRIVEBASE_GEARBOX;
-import static frc.robot.Constants.DRIVEBASE_KINEMATICS;
-import static frc.robot.Constants.DRIVEBASE_LINEAR_FF_MPS;
-import static frc.robot.Constants.DRIVEBASE_METERS_PER_WHEEL_ROTATION;
-import static frc.robot.Constants.DRIVEBASE_P;
-import static frc.robot.Constants.DRIVEBASE_PLANT;
-import static frc.robot.Constants.DRIVEBASE_SIM_ENCODER_STD_DEV;
-import static frc.robot.Constants.DRIVEBASE_TRACKWIDTH;
-import static frc.robot.Constants.DRIVEBASE_TURN_SLEW_LIMIT;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -28,6 +16,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -35,10 +25,17 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 //import frc.robot.util.pose.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.numbers.N7;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SerialPort.Port;
@@ -50,7 +47,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
@@ -58,6 +54,96 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class DrivebaseS extends SubsystemBase implements Loggable {
+  //#region
+  public static final double DEADBAND = 0.03;
+
+  /** Slew limit for drivebase motors */
+  public static final double TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
+
+  /** Slew limit for drivebase forward back motors */
+  public static final double FWD_BACK_SLEW_LIMIT = 1.5; // 0 to 100% in one second.
+
+  /** Drivebase encoder rotations per wheel rotation. */
+  public static final double ENCODER_ROTATIONS_PER_WHEEL_ROTATION = (28.0 / 20.0) * (64.0 / 12.0);
+
+  /** The maximum teleop velocity of the drivebase in meters per second. */
+  public static final double MAX_WHEEL_VELOCITY_MPS = 3.0;
+
+  /** The wheel diameter of the drivebase in meters. Equivalent to 6 inches. */
+  public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
+
+  /** The circumference of the drivebase wheel. */
+  public static final double METERS_PER_WHEEL_ROTATION = Math.PI * WHEEL_DIAMETER;
+
+  /**
+  * Converts drivebase encoder rotations to meters traveled by the drivebase
+  * wheel.
+  * 
+  * @param rotations The drivebase encoder rotations.
+  * @return meters traveled by the drivebase wheel.
+  */
+  public static final double drivebaseEncoderRotationsToMeters(double rotations) {
+  return rotations
+  * METERS_PER_WHEEL_ROTATION
+  / ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
+  }
+
+  /**
+  * The track width of the drivebase.
+  */
+  public static final double TRACKWIDTH = Units.inchesToMeters(22.5);
+
+  /**
+  * The feedforward constants for forward-back driving.
+  */
+  public static final double[] LINEAR_FF_MPS = { 0.034258,
+  2.0657,
+  0.60947 };
+
+  /**
+  * The feedforward constants for rotation while driving.
+  */
+  public static final double[] ANGULAR_FF = { 0.034258, 2.0657,
+  0.2605 };
+
+  /**
+  * The proportional constant for the drivebase wheel.
+  */
+  public static final double P = 8.6995;// 0.72534;//9.5653;
+
+  /**
+  * The system modeling plant for the drivebase.
+  * 
+  */
+  public static final LinearSystem<N2, N2, N2> PLANT = LinearSystemId.identifyDrivetrainSystem(
+  LINEAR_FF_MPS[1],
+  LINEAR_FF_MPS[2],
+  ANGULAR_FF[1],
+  ANGULAR_FF[2],
+  TRACKWIDTH);
+
+  /** The DifferentialDriveKinematics for the drivebase. */
+  public static final DifferentialDriveKinematics KINEMATICS = new DifferentialDriveKinematics(
+  TRACKWIDTH);
+
+  /**
+  * The gearbox configuration for the drivebase.
+  */
+  public static final DCMotor GEARBOX = DCMotor.getNEO(2);
+
+  /**
+  * Standard deviations for noise in simulation encoders.
+  */
+  public static final Vector<N7> SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
+
+  /**
+  * Trajectory config for auto.
+  */
+  public static final TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(2, 2).setEndVelocity(0);
+
+  //#endregion
+
+  /* ==BEGIN CLASS== */
   /**
    * The odometry object, which checks the encoder readings and gyro every loop and calculates the robot's change in pose
    * to keep an estimate of the field-relative position of the robot.
@@ -72,20 +158,20 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   /* Slew rate limiters. These filters limit the rate of change of the joystick axes. If the parameter is n,
   these limit the axes to changing no faster than "0 to full in n seconds" */
-  private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(DRIVEBASE_FWD_BACK_SLEW_LIMIT);
-  private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
+  private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(FWD_BACK_SLEW_LIMIT);
+  private final SlewRateLimiter turnLimiter = new SlewRateLimiter(TURN_SLEW_LIMIT);
 
   /**
    * Feedforwards for both drivebase sides in meters per second.
    */
-  public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF_MPS[0], DRIVEBASE_LINEAR_FF_MPS[1], DRIVEBASE_LINEAR_FF_MPS[2]);
-  public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF_MPS[0], DRIVEBASE_LINEAR_FF_MPS[1], DRIVEBASE_LINEAR_FF_MPS[2]);
+  public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(LINEAR_FF_MPS[0], LINEAR_FF_MPS[1], LINEAR_FF_MPS[2]);
+  public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(LINEAR_FF_MPS[0], LINEAR_FF_MPS[1], LINEAR_FF_MPS[2]);
 
   /**
    * Velocity PID controllers for both drivebase sides.
    */
-  public final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
-  public final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
+  public final PIDController leftPID = new PIDController(P, 0, 0);
+  public final PIDController rightPID = new PIDController(P, 0, 0);
 
   /**
    * The gyro sensor. This sits in the middle of the bot and tracks the heading (turning angle) of the robot.
@@ -116,14 +202,14 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     frontRight.restoreFactoryDefaults();
     frontLeft.restoreFactoryDefaults();
 
-    frontRight.getEncoder().setPositionConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
-    frontRight.getEncoder().setVelocityConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
-    frontLeft.getEncoder().setPositionConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
-    frontLeft.getEncoder().setVelocityConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
+    frontRight.getEncoder().setPositionConversionFactor(METERS_PER_WHEEL_ROTATION 
+    / ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
+    frontRight.getEncoder().setVelocityConversionFactor(METERS_PER_WHEEL_ROTATION 
+    / ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
+    frontLeft.getEncoder().setPositionConversionFactor(METERS_PER_WHEEL_ROTATION 
+    / ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
+    frontLeft.getEncoder().setVelocityConversionFactor(METERS_PER_WHEEL_ROTATION 
+    / ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
 
     backRight.restoreFactoryDefaults();
     backLeft.restoreFactoryDefaults();
@@ -141,12 +227,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
     if (RobotBase.isSimulation()) {
       m_driveSim = new DifferentialDrivetrainSim(
-        DRIVEBASE_PLANT,
-        DRIVEBASE_GEARBOX,
-        1 / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION,
-        DRIVEBASE_TRACKWIDTH,
+        PLANT,
+        GEARBOX,
+        1 / ENCODER_ROTATIONS_PER_WHEEL_ROTATION,
+        TRACKWIDTH,
         Units.inchesToMeters(6), // wheel radius is half of an encoder position unit.
-        DRIVEBASE_SIM_ENCODER_STD_DEV);
+        SIM_ENCODER_STD_DEV);
 		}
     resetRobotPose(START_POSE);
     
@@ -167,7 +253,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * Creates a deadband for the drivebase joystick
    */
   public double deadbandJoysticks(double value) {
-    if (Math.abs(value) < DRIVEBASE_DEADBAND) {
+    if (Math.abs(value) < DEADBAND) {
       value = 0;
     }
     return value;
@@ -300,7 +386,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * @return
    */
   public ChassisSpeeds getChassisSpeeds() {
-    return DRIVEBASE_KINEMATICS.toChassisSpeeds(getWheelSpeeds());
+    return KINEMATICS.toChassisSpeeds(getWheelSpeeds());
   }
 
   /**
@@ -378,8 +464,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
     if(RobotBase.isSimulation()) {
-        leftVolts = NomadMathUtil.subtractkS(leftVolts, Constants.DRIVEBASE_LINEAR_FF_MPS[0]);
-        rightVolts = NomadMathUtil.subtractkS(rightVolts, Constants.DRIVEBASE_LINEAR_FF_MPS[0]);
+        leftVolts = NomadMathUtil.subtractkS(leftVolts, LINEAR_FF_MPS[0]);
+        rightVolts = NomadMathUtil.subtractkS(rightVolts, LINEAR_FF_MPS[0]);
     }
     frontLeft.setVoltage(leftVolts);
     frontRight.setVoltage(rightVolts);
@@ -447,7 +533,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
         trajectory,
         this::getRobotPose,
         this.ramseteController,
-        Constants.DRIVEBASE_KINEMATICS,
+        KINEMATICS,
         this::tankDriveVelocity,
         this
       ).andThen(stopC());

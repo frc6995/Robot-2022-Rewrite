@@ -322,18 +322,8 @@ public final class Constants {
    * The PID error of the climber
    */
   public static final int CLIMBER_PID_ERROR = 10;
-  /**
-   * The max amount of rotations extending the climber
-   */
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 280.0 / 49.0 * 35.0;
-  /**
-   * The maximum a mount of rotations retracting the climber
-   */
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0 / 49.0 * 35.0;
 
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 75.0 / 49.0 * 35.0;
-
-  public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -2;
+  
 
   public static final double CLIMBER_BACK_TRANSFER_VOLTS = 3;
 
@@ -382,26 +372,6 @@ public final class Constants {
   public static final int BACK_CLIMBER_D_CONSTANT = 0;
 
   // LED Constants
-
-  /** The roboRIO spark value for solid green LEDs */
-  public static final double LED_SOLID_GREEN = 0.77;
-
-  /** The roboRIO spark value for Light Chase pattern */
-  public static final double LED_PATTERN_GREEN = 0.01;
-
-  /** The roboRIO spark value for Strobe, Red pattern */
-  public static final double LED_PATTERN_RED = -0.11;
-
-  /** The roboRIO spark value for Rainbow, Party Palette pattern */
-  public static final double LED_PARTY_MODE = -0.97;
-
-  public static final double LED_GOLD_SOLID = 0.67;
-
-  public static final double LED_GREEN_RAINBOW = -0.91;
-
-  public static final double LED_LARSON_SCANNER = -0.01;
-
-  public static final double LED_CONFETTI_MODE = -0.87;
 
   public static final int PWM_PORT_LED = 9;
 

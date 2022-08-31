@@ -15,6 +15,7 @@ import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
 
 public class TiltClimberS extends SubsystemBase implements Loggable {
+  // TODO Have students make this subsystem like LinearClimberS
   private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.DOUBLE_SOLENOID_CLIMBER_FORWARD, 
   Constants.DOUBLE_SOLENOID_CLIMBER_BACK);
 
