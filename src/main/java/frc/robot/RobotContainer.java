@@ -32,8 +32,11 @@ public class RobotContainer implements Loggable {
   CommandXboxController driverController = new CommandXboxController(0);
 
   // The robot's subsystems and commands are defined here...
+  @Log
   TurretS turretS;
+  @Log
   SuperClimberS superClimberS;
+  @Log
   DrivebaseS drivebaseS;
 
   // The simulated field

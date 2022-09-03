@@ -18,10 +18,17 @@
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
+        "bottom": 903,
+        "height": 8.229599952697754,
+        "image": "C:\\Users\\jashu\\PathWeaver\\Games\\2022 Rapid React\\2022-field.png",
+        "left": 74,
+        "right": 1781,
+        "top": 45,
         "turret": {
           "length": 3.0,
           "width": 0.30000001192092896
         },
+        "width": 16.459199905395508,
         "window": {
           "visible": true
         }
@@ -30,6 +37,15 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
+      "DrivebaseS": {
+        "open": true
+      },
+      "RobotContainer": {
+        "field": {
+          "open": true
+        },
+        "open": true
+      },
       "SuperClimberS": {
         "LinearClimberS": {
           "open": true
@@ -39,19 +55,29 @@
         },
         "TiltClimberS": {
           "open": true
-        },
-        "open": true
-      },
-      "TurretS": {
-        "open": true
+        }
       },
       "open": true
     },
     "SmartDashboard": {
-      "open": true,
       "turret": {
         "open": true
       }
+    },
+    "Some Key": {
+      "open": true
+    },
+    "lineChart": {
+      "open": true
+    },
+    "lineChart2": {
+      "open": true
+    },
+    "lineChartData2": {
+      "open": true
+    },
+    "playground": {
+      "open": true
     }
   },
   "Plot": {

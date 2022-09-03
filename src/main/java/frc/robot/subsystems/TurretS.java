@@ -41,6 +41,7 @@ import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.Logger;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -103,12 +104,6 @@ public class TurretS extends SubsystemBase implements Loggable {
   private LinearSystemSim<N2, N1, N1> turretSim = new LinearSystemSim<N2, N1, N1>(
     LinearSystemId.identifyPositionSystem(TURRET_FF[1], TURRET_FF[2])
     );
-
-  /** 
-   * The output of the ProfiledPidController. Updated every loop as required by the controller,
-   * but not always used.
-   */
-  private double pidVelocity = 0;
 
   NetworkButton turretResetNetworkButton;
 
@@ -312,7 +307,9 @@ public class TurretS extends SubsystemBase implements Loggable {
     }
     else {
       // Otherwise, run the PID controller and command the output velocity.
-      pidVelocity = turretPID.calculate(getEncoderCounts());
+      // PID calculates velocity needed to minimize position error between reality and the (moving) setpoint
+      double pidVelocity = turretPID.calculate(getEncoderCounts());
+      // We add the rate at which the profiled position setpoint is changing, as somewhat of a feedforward.
       setVelocity(pidVelocity + turretPID.getSetpoint().velocity);
       // The PID is tuned quite low because the feedforward does most of the work of tracking the setpoint's velocity.
     }
@@ -347,11 +344,6 @@ public class TurretS extends SubsystemBase implements Loggable {
 
     // Calculate the physics simulation over the next loop time (nominally 0.02 sec)
     turretSim.update(0.02);
-
-
-    // The simulated motor math works with grids of values (called matrix, plural matrices).
-    // See `setSimState`, where we set the position and velocity of the sim as a 1 row 2 column matrix.
-    // Here, we have the output matrix, which is 1x1.
     // Row 0, column 0 is position (in the position units of our FF constants, radians)
     double newPosition = turretSim.getOutput().get(0, 0);
 
@@ -420,7 +412,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Creates a command that minimizes the error externally supplied through the given DoubleSupplier.
+   * Creates a command that minimizes the error externally supplied through the given DoubleSupplier. Use this for Limelight.
    * 
    * Positive error means the turret should turn CCW
    * @param error
