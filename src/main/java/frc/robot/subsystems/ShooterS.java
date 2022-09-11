@@ -15,11 +15,12 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.util.command.RunEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.LightsManager.States;
@@ -37,9 +38,10 @@ import io.github.oblarg.oblog.annotations.Log;
 public class ShooterS extends SubsystemBase implements Loggable {
   private final CANSparkMax frontSparkMax = new CANSparkMax(CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backSparkMax = new CANSparkMax(CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
-  private RelativeEncoder frontEncoder;
+  private Encoder frontEncoder;
   private RelativeEncoder backEncoder;
 
+  // flywheel rotations per second
   private SimpleMotorFeedforward frontFF = new SimpleMotorFeedforward(
     SHOOTER_FRONT_FF[0],
     SHOOTER_FRONT_FF[1],
@@ -71,19 +73,20 @@ public class ShooterS extends SubsystemBase implements Loggable {
     frontSparkMax.setSmartCurrentLimit(20, 30, 0);
     backSparkMax.setSmartCurrentLimit(20, 30, 0);
 
-    frontEncoder = frontSparkMax.getEncoder();
+    frontEncoder = new Encoder(Constants.SHOOTER_FRONT_ENCODER[0], Constants.SHOOTER_FRONT_ENCODER[1]);
+    frontEncoder.setDistancePerPulse(1.0/Constants.SHOOTER_ENCODER_CPR);
     backEncoder = backSparkMax.getEncoder();
   }
 
   /**
    * Gets the front encoder speed
    * 
-   * @return The velocity of the front motor
+   * @return The velocity of the front motor in RPM
    */
   @Log
   public double getFrontEncoderSpeed() {
     if(RobotBase.isReal()) {
-      return frontEncoder.getVelocity();
+      return frontEncoder.getRate() * 60.0; //rate is in rot/s so multiply by 60 for rpm
     } else {
       return frontSimEncoder.getVelocity();
     }
@@ -207,7 +210,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
   }
 
   public Command spinVelocityC(DoubleSupplier frontVelocityRPM, DoubleSupplier backVelocityRPM) {
-    return new RunCommand(
+    return new RunEndCommand(
       ()->{
         this.setFrontVelocity(
           frontVelocityRPM.getAsDouble()
@@ -215,7 +218,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
         this.setBackVelocity(
           backVelocityRPM.getAsDouble()
         );
-      }, this);
+      }, this::stop, this);
   }
 
   public Command spinDistanceC(DoubleSupplier distance) {

@@ -146,17 +146,25 @@ public final class Constants {
   /** Can id for back shooter motor */
   public static final int CAN_ID_BACK_SHOOTER_MOTOR = 41;
 
-  /** Shooter front wheel feed forward */
-  public static final double[] SHOOTER_FRONT_FF = { 0.18114, 0.1298, 0.01253 };
+  /** Shooter front wheel feed forward. Flywheel Rotations per Second */
+  public static final double[] SHOOTER_FRONT_FF = { 0.16409, 0.077049, 0.025033 };
+
+  public static final int[] SHOOTER_FRONT_ENCODER = {6, 7};
+
+  public static final int SHOOTER_ENCODER_CPR = 2048;
+
+  public static final double SHOOTER_FRONT_WHEEL_REVS_PER_MOTOR_REV = 30.0/24.0;
 
   /** Proportional term for front shooter wheel */
-  public static final double SHOOTER_FRONT_P = 0.013714;
+  public static final double SHOOTER_FRONT_P = 0.16888;
 
-  /** Shooter back wheel feed forward */
-  public static final double[] SHOOTER_BACK_FF = { 0.41933, 0.13317, 0.0042113 };
+  /** Shooter back wheel feed forward. Flywheel Rotations Per Second. Last id'd 9.8.22*/
+  public static final double[] SHOOTER_BACK_FF = { 0.38787, 0.10923, 0.010083 };
 
   /** Proportional term for back shooter wheel */
-  public static final double SHOOTER_BACK_P = 0.019475;
+  public static final double SHOOTER_BACK_P = 0.12809;
+
+  public static final int[] SHOOTER_BACK_ENCODER = {8,9};
 
   /** Allowable error to still be on target */
   public static final double SHOOTER_PID_ERROR = 100; // rpm

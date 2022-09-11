@@ -14,7 +14,10 @@
       "/LiveWindow/TurretS": "Subsystem",
       "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
-      "/Shuffleboard/RobotContainer/field": "Field2d"
+      "/Shuffleboard/RobotContainer/drivebaseS": "Subsystem",
+      "/Shuffleboard/RobotContainer/field": "Field2d",
+      "/Shuffleboard/RobotContainer/shooterS": "Subsystem",
+      "/Shuffleboard/RobotContainer/turretS": "Subsystem"
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
@@ -37,13 +40,12 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
-      "DrivebaseS": {
-        "open": true
-      },
       "RobotContainer": {
         "field": {
           "open": true
-        },
+        }
+      },
+      "ShooterS": {
         "open": true
       },
       "SuperClimberS": {
@@ -167,6 +169,15 @@
                 1.0
               ],
               "id": "SPARK MAX [30]-Applied Output"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/ShooterS/getFrontEncoderSpeed"
             }
           ]
         }

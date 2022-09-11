@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.auto.Trajectories;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.subsystems.climb.SuperClimberS;
 import frc.robot.util.NomadMathUtil;
@@ -23,9 +24,12 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer implements Loggable {
@@ -37,59 +41,71 @@ public class RobotContainer implements Loggable {
   SuperClimberS superClimberS;
   @Log
   DrivebaseS drivebaseS;
+  @Log
+  ShooterS shooterS;
 
   // The simulated field
   @Log
   Field2d field = new Field2d();
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     createSubsystems();
     createCommands();
     createTriggers();
     configureButtonBindings();
     // Configure the button bindings
-    
+
   }
 
   private void createSubsystems() {
     turretS = new TurretS();
     superClimberS = new SuperClimberS();
     drivebaseS = new DrivebaseS();
+    shooterS = new ShooterS();
   }
 
   private void createCommands() {
     turretS.setDefaultCommand(turretS.manualC(driverController::getRightX));
     drivebaseS.setDefaultCommand(
-      drivebaseS.createCurvatureDriveC(
-        ()-> -driverController.getLeftY(),
-        driverController::getLeftX
-      )
-    );
+        drivebaseS.createCurvatureDriveC(
+            () -> -driverController.getLeftY(),
+            driverController::getLeftX));
+
   }
 
   private void createTriggers() {
   }
 
-
-
-
-
-
-
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whenActive(turretS.turnAngleC(()->{
-      return NomadMathUtil.getDirection(new Transform2d(drivebaseS.getRobotPose(), Trajectories.HUB_CENTER_POSE)).getRadians();
+    driverController.a().whileActiveContinuous(shooterS.spinVelocityC(()->1000, ()->0));
+    /** 
+     * (1000 rot/min) / 60 (sec/min) = 16.667 rot/s
+     * [16.667 rot/s * 0.077049 V/(rot/s)] + 0.16409 V = 1.28 V
+     */
+    /*driverController.a().whenActive(turretS.turnAngleC(() -> {
+      return NomadMathUtil.getDirection(new Transform2d(drivebaseS.getRobotPose(), Trajectories.HUB_CENTER_POSE))
+          .getRadians();
+    })); 
+    */
+    driverController.b().whenActive(turretS.zeroErrorC(() -> {
+      return turretS.getError(new Rotation2d(Math.PI));
     }));
-    driverController.b().whenActive(turretS.zeroErrorC(()->{return turretS.getError(new Rotation2d(Math.PI));}));
-    driverController.x().whenActive(turretS.turnAngleC(()->3*Math.PI/2));
-    
-    driverController.y().whenActive(turretS.turnAngleC(()->{return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));}));
+    driverController.x().whenActive(turretS.turnAngleC(() -> 3 * Math.PI / 2));
+
+    driverController.y().whenActive(turretS.turnAngleC(() -> {
+      return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));
+    }));
   }
 
   /**
@@ -104,17 +120,15 @@ public class RobotContainer implements Loggable {
 
   public void periodic() {
     /**
-     * Set the robot position and the turret (as a rotated copy of the robot position)
+     * Set the robot position and the turret (as a rotated copy of the robot
+     * position)
      */
     field.setRobotPose(drivebaseS.getRobotPose());
     field.getObject("turret").setPose(
-      drivebaseS.getRobotPose()
-      .transformBy(
-        new Transform2d(new Translation2d(),
-          turretS.getRobotToTurretRotation()
-        )
-      )
-    );
+        drivebaseS.getRobotPose()
+            .transformBy(
+                new Transform2d(new Translation2d(),
+                    turretS.getRobotToTurretRotation())));
 
   }
 }
