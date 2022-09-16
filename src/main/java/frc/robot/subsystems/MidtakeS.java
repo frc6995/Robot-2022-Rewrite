@@ -148,10 +148,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
 
   public Command lowIndexC() {
     return 
-    new SequentialCommandGroup(
-      // Reverse for 0.3 s or until the bottom beam is broken
-      reverseC().until(bottomBeamBreakTrigger).withTimeout(0.3),
-      // Then go straight into the repeating wait-drive-wait-drive cycle
+      // go straight into the repeating wait-drive-wait-drive cycle
       new RepeatCommand(
         new SequentialCommandGroup(
           // Wait until the bottom is triggered and the top is clear
@@ -164,7 +161,6 @@ public class MidtakeS extends SubsystemBase implements Loggable{
           loadC()
             .until(bottomBeamBreakTrigger.negate().or(topBeamBreakTrigger))
         )
-      )
     );
   }
 

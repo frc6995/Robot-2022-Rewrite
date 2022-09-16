@@ -30,8 +30,8 @@ public class Limelight implements Loggable {
 
   /** Creates a new LimelightS. */
   public Limelight() {
-    NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
-        PhotonVersion.versionString);
+    // NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
+    //     PhotonVersion.versionString);
   }
 
   /**
