@@ -69,10 +69,10 @@ public class RobotContainer implements Loggable {
 
   private void createCommands() {
     turretS.setDefaultCommand(turretS.manualC(driverController::getRightX));
-    drivebaseS.setDefaultCommand(
-        drivebaseS.createCurvatureDriveC(
-            () -> -driverController.getLeftY(),
-            driverController::getLeftX));
+    // drivebaseS.setDefaultCommand(
+    //     drivebaseS.createCurvatureDriveC(
+    //         () -> -driverController.getLeftY(),
+    //         driverController::getLeftX));
 
   }
 
@@ -88,7 +88,7 @@ public class RobotContainer implements Loggable {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whileActiveContinuous(shooterS.spinVelocityC(()->1000, ()->0));
+    driverController.a().whileActiveContinuous(shooterS.spinVelocityC(()->0, ()->{return 2000 + 1000*driverController.getLeftY();}));
     /** 
      * (1000 rot/min) / 60 (sec/min) = 16.667 rot/s
      * [16.667 rot/s * 0.077049 V/(rot/s)] + 0.16409 V = 1.28 V

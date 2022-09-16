@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +33,7 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     Logger.configureLoggingAndConfig(m_robotContainer, false);
     // Disable LiveWindow, an obsolete telemetry system that takes a significant portion of loop time but is not used.
+    NetworkTableInstance.getDefault().setUpdateRate(0.01);
     LiveWindow.disableAllTelemetry();
   }
 

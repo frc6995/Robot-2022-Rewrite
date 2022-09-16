@@ -162,7 +162,7 @@ public final class Constants {
   public static final double[] SHOOTER_BACK_FF = { 0.38787, 0.10923, 0.010083 };
 
   /** Proportional term for back shooter wheel */
-  public static final double SHOOTER_BACK_P = 0.12809;
+  public static final double SHOOTER_BACK_P = 0.089373 * 1.5;
 
   public static final int[] SHOOTER_BACK_ENCODER = {8,9};
 
