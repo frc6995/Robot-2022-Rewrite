@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.auto.Trajectories;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.subsystems.climb.SuperClimberS;
@@ -43,6 +44,7 @@ public class RobotContainer implements Loggable {
   DrivebaseS drivebaseS;
   @Log
   ShooterS shooterS;
+  Limelight limelight;
 
   // The simulated field
   @Log
@@ -65,14 +67,15 @@ public class RobotContainer implements Loggable {
     superClimberS = new SuperClimberS();
     drivebaseS = new DrivebaseS();
     shooterS = new ShooterS();
+    limelight = new Limelight();
   }
 
   private void createCommands() {
     turretS.setDefaultCommand(turretS.manualC(driverController::getRightX));
-    // drivebaseS.setDefaultCommand(
-    //     drivebaseS.createCurvatureDriveC(
-    //         () -> -driverController.getLeftY(),
-    //         driverController::getLeftX));
+    drivebaseS.setDefaultCommand(
+        drivebaseS.createCurvatureDriveC(
+            () -> driverController.getRightTriggerAxis()-driverController.getLeftTriggerAxis(),
+            driverController::getLeftX));
 
   }
 
@@ -89,6 +92,10 @@ public class RobotContainer implements Loggable {
    */
   private void configureButtonBindings() {
     driverController.a().whileActiveContinuous(shooterS.spinVelocityC(()->0, ()->{return 2000 + 1000*driverController.getLeftY();}));
+
+    driverController.b().whileActiveContinuous(
+      turretS.manualC(()->{return 5 * limelight.getFilteredXOffset();})
+    );
     /** 
      * (1000 rot/min) / 60 (sec/min) = 16.667 rot/s
      * [16.667 rot/s * 0.077049 V/(rot/s)] + 0.16409 V = 1.28 V
@@ -98,14 +105,14 @@ public class RobotContainer implements Loggable {
           .getRadians();
     })); 
     */
-    driverController.b().whenActive(turretS.zeroErrorC(() -> {
-      return turretS.getError(new Rotation2d(Math.PI));
-    }));
-    driverController.x().whenActive(turretS.turnAngleC(() -> 3 * Math.PI / 2));
+    // driverController.b().whenActive(turretS.zeroErrorC(() -> {
+    //   return turretS.getError(new Rotation2d(Math.PI));
+    // }));
+    // driverController.x().whenActive(turretS.turnAngleC(() -> 3 * Math.PI / 2));
 
-    driverController.y().whenActive(turretS.turnAngleC(() -> {
-      return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));
-    }));
+    // driverController.y().whenActive(turretS.turnAngleC(() -> {
+    //   return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));
+    // }));
   }
 
   /**

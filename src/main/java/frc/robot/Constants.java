@@ -252,7 +252,7 @@ public final class Constants {
   public static final double CAMERA_DIAG_FOV_DEGREES = 67.8;
 
   /** Height of the camera off the ground in meters */
-  public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(38); // 37 inches
+  public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(37); // 37 inches
 
   /** Offset of the camera from the center of the turret in meters */
   public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(9.5);

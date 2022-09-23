@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -36,7 +38,6 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
   private boolean beamBreakTopBroken = false;
   private boolean beamBreakBottomBroken = false;
-  
 
   public final Trigger topBeamBreakTrigger = new Trigger(this::getIsTopBeamBroken);
   public final Trigger bottomBeamBreakTrigger = new Trigger(this::getIsBottomBeamBroken);
@@ -163,15 +164,4 @@ public class MidtakeS extends SubsystemBase implements Loggable{
         )
     );
   }
-
-  /**
-   * Creates a command to fire one ball. 
-   * 
-   * @return
-   */
-  public Command feedOneC() {
-    return feedC().until(TriggerUtil.falling(this::getIsTopBeamBroken)).withTimeout(0.3);
-  }
-
-
 }
