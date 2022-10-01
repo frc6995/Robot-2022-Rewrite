@@ -14,9 +14,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.Trajectories;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.subsystems.climb.SuperClimberS;
@@ -35,6 +39,7 @@ import io.github.oblarg.oblog.annotations.Log;
  */
 public class RobotContainer implements Loggable {
   CommandXboxController driverController = new CommandXboxController(0);
+  CommandXboxController operatorController = new CommandXboxController(1);
 
   // The robot's subsystems and commands are defined here...
   @Log
@@ -44,11 +49,17 @@ public class RobotContainer implements Loggable {
   DrivebaseS drivebaseS;
   @Log
   ShooterS shooterS;
+  @Log
+  MidtakeS midtakeS;
+  IntakeS intakeS;
   Limelight limelight;
 
   // The simulated field
   @Log
   Field2d field = new Field2d();
+
+  Trigger shootButton = new Trigger(()->operatorController.getRightTriggerAxis() > 0.5);
+  Trigger spinUpButton = new Trigger(()->operatorController.getLeftTriggerAxis() > 0.5);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -67,6 +78,8 @@ public class RobotContainer implements Loggable {
     superClimberS = new SuperClimberS();
     drivebaseS = new DrivebaseS();
     shooterS = new ShooterS();
+    midtakeS = new MidtakeS();
+    intakeS = new IntakeS();
     limelight = new Limelight();
   }
 
@@ -76,6 +89,8 @@ public class RobotContainer implements Loggable {
         drivebaseS.createCurvatureDriveC(
             () -> driverController.getRightTriggerAxis()-driverController.getLeftTriggerAxis(),
             driverController::getLeftX));
+    midtakeS.setDefaultCommand(midtakeS.idleC());
+
 
   }
 
@@ -91,28 +106,18 @@ public class RobotContainer implements Loggable {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whileActiveContinuous(shooterS.spinVelocityC(()->0, ()->{return 2000 + 1000*driverController.getLeftY();}));
-
-    driverController.b().whileActiveContinuous(
-      turretS.manualC(()->{return 5 * limelight.getFilteredXOffset();})
+    
+    driverController.a()
+    .toggleWhenActive(
+      new ParallelCommandGroup(
+        intakeS.deployAndSpinC(),
+        midtakeS.intakeC()
+      )
     );
-    /** 
-     * (1000 rot/min) / 60 (sec/min) = 16.667 rot/s
-     * [16.667 rot/s * 0.077049 V/(rot/s)] + 0.16409 V = 1.28 V
-     */
-    /*driverController.a().whenActive(turretS.turnAngleC(() -> {
-      return NomadMathUtil.getDirection(new Transform2d(drivebaseS.getRobotPose(), Trajectories.HUB_CENTER_POSE))
-          .getRadians();
-    })); 
-    */
-    // driverController.b().whenActive(turretS.zeroErrorC(() -> {
-    //   return turretS.getError(new Rotation2d(Math.PI));
-    // }));
-    // driverController.x().whenActive(turretS.turnAngleC(() -> 3 * Math.PI / 2));
 
-    // driverController.y().whenActive(turretS.turnAngleC(() -> {
-    //   return Units.degreesToRadians(180 + (driverController.getLeftX() * 110));
-    // }));
+    spinUpButton.whileActiveContinuous(shooterS.spinVelocityC(()->3000, ()->3000));
+    shootButton.whileActiveContinuous(midtakeS.shootC());
+
   }
 
   /**

@@ -118,5 +118,18 @@ public class IntakeS extends SubsystemBase implements Loggable {
         return new RunCommand(this::retract, this);
     }
 
+    public Command deployAndSpinC() {
+        return new RunEndCommand(
+            ()-> {
+                this.deploy();
+                this.spin();
+            }, 
+            ()-> {
+                this.retract();
+                this.stop();
+            }, this);
+    }
+
+
 
 }

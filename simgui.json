@@ -16,6 +16,7 @@
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
       "/Shuffleboard/RobotContainer/drivebaseS": "Subsystem",
       "/Shuffleboard/RobotContainer/field": "Field2d",
+      "/Shuffleboard/RobotContainer/midtakeS": "Subsystem",
       "/Shuffleboard/RobotContainer/shooterS": "Subsystem",
       "/Shuffleboard/RobotContainer/turretS": "Subsystem"
     },

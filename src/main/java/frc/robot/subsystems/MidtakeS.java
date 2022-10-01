@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import java.util.function.BooleanSupplier;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
@@ -33,6 +35,8 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   @Log(methodName = "getAppliedOutput", name = "backVolts")
   private CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_MIDTAKE_BACK,
       MotorType.kBrushless);
+  @Log(methodName = "getVelocity")
+  private RelativeEncoder backEncoder = backSparkMax.getEncoder();
 
   private DigitalInput beamBreakTop = new DigitalInput(Constants.BEAM_BREAK_TOP_PORT_NUMBER);
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
@@ -54,6 +58,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     
   }
 
+
   /**
    * Sets the speed of the front motor
    * 
@@ -71,7 +76,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   }
 
   public void reverse() {
-    spin(-Constants.MIDTAKE_LOADING_VOLTS);
+    spin(-Constants.MIDTAKE_CRAWL_VOLTS);
   }
 
   public void feed() {
@@ -147,7 +152,16 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     return new InstantCommand(this::stop, this);
   }
 
-  public Command lowIndexC() {
+  /*
+   * If Shooting:
+    Pulse Midtake @ Fast Short Bursts. (Repeatedly)
+Else if intaking:
+    When/While Bottom BB broken & Top BB clear, drive up
+Else:
+   When/While Bottom BB clear, drive down.
+   */
+
+  public Command intakeC() {
     return 
       // go straight into the repeating wait-drive-wait-drive cycle
       new RepeatCommand(
@@ -163,5 +177,24 @@ public class MidtakeS extends SubsystemBase implements Loggable{
             .until(bottomBeamBreakTrigger.negate().or(topBeamBreakTrigger))
         )
     );
+  }
+
+  public Command shootC() {
+    return new SequentialCommandGroup(
+    feedC().withTimeout(0.2),
+          new WaitCommand(1.25),
+      new RepeatCommand(
+        new SequentialCommandGroup(
+          feedC().withTimeout(0.25),
+          new WaitCommand(1.25)
+        )
+      ));
+  }
+
+  public Command idleC() {
+    return 
+      new RepeatCommand(
+        reverseC().until(bottomBeamBreakTrigger)
+      );
   }
 }
