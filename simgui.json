@@ -11,6 +11,21 @@
           "open": true
         }
       },
+      "SPARK MAX [20]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [22]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [23]": {
+        "header": {
+          "open": true
+        }
+      },
       "navX-Sensor[0]": {
         "header": {
           "open": true
@@ -154,7 +169,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <1>": {
       "plots": [
@@ -192,6 +210,24 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/ShooterS/getFrontEncoderSpeed"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "SPARK MAX [23]-Applied Output"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "SPARK MAX [20]-Applied Output"
             }
           ]
         }

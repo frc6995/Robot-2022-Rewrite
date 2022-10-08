@@ -227,14 +227,15 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     burnFlash();
 
 
-    Shuffleboard.getTab("DrivebaseS")
-    .add("requestPoseReset", false) //Add the boolean to Shuffleboard.
-    .getEntry()
-    .addListener((notif)->{ // Add a listener for changes to the value.
-      if(notif.value.getBoolean()) { // If the value changes to true, 
-        resetRobotPose(this.START_POSE); // reset encoder
-      }
-    }, 0);
+    // Shuffleboard.getTab("DrivebaseS")
+    // .add("requestPoseReset", false) //Add the boolean to Shuffleboard.
+    // .getEntry()
+    // .addListener((notif)->{ // Add a listener for changes to the value.
+    //   if(notif.value.getBoolean()) { // If the value changes to true, 
+    //     resetRobotPose(START_POSE); // reset encoder
+
+    //   }
+    // }, 0);
 
     if (RobotBase.isSimulation()) {
       m_driveSim = new DifferentialDrivetrainSim(
@@ -302,8 +303,10 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void curvatureDrive(double fwdBack, double turn) {
     fwdBack = MathUtil.applyDeadband(fwdBack, 0.02);
     turn = MathUtil.applyDeadband(turn, 0.05);
+    fwdBack = fwdBack * 6.5 / 12;
     fwdBack = fwdBackLimiter.calculate(fwdBack);
     turn = turnLimiter.calculate(turn);
+
     boolean quickTurn = false;
     if (fwdBack == 0) {
       quickTurn = true;
@@ -345,7 +348,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * Sets motor speed to 0 when subsystem ends
    */
   public void stopAll() {
-    tankDriveVelocity(0, 0);
+    tankDriveVolts(0, 0);
   }
 
   @Override
@@ -458,8 +461,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * @param pose
    */
   public void resetRobotPose(Pose2d pose) {
-    odometry.resetPosition(pose, getGyroHeading());
     resetEncoders(); 
+    odometry.resetPosition(pose, getGyroHeading());
+    if(!RobotBase.isReal()) {
+      m_driveSim.setPose(pose);
+    }
+    
        
   }
 

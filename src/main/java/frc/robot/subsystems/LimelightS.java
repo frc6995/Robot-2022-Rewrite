@@ -47,6 +47,7 @@ public class LimelightS extends SubsystemBase implements Loggable {
     tvEntry = limelightTable.getEntry("tv");
     ledModeEntry = limelightTable.getEntry("ledMode");
     camModeEntry = limelightTable.getEntry("camMode");
+    trackingOff();
     setDefaultCommand(new RunCommand(this::trackingOff, this));
   }
 
