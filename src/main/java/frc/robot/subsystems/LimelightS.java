@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
-import org.photonvision.PhotonVersion;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ProxyScheduleCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.NomadMathUtil;
@@ -19,7 +20,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Valentine King
  */
 
-public class Limelight extends SubsystemBase implements Loggable {
+public class LimelightS extends SubsystemBase implements Loggable {
 
   // Sim stuff
 
@@ -31,18 +32,22 @@ public class Limelight extends SubsystemBase implements Loggable {
   private double filteredXOffsetRadians = 0;
   @Log
   private double filteredDistanceMeters = 0;
-  private double lastValidDistance = 0;
   private NetworkTableEntry txEntry;
   private NetworkTableEntry tyEntry;
   private NetworkTableEntry tvEntry;
   private NetworkTableEntry ledModeEntry;
+  private NetworkTableEntry camModeEntry;
+  private NetworkTable limelightTable;
 
   /** Creates a new LimelightS. */
-  public Limelight() {
-    txEntry = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tx");
-    tyEntry = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ty");
-    tvEntry = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv");
-    ledModeEntry = NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode");
+  public LimelightS() {
+    limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+    txEntry = limelightTable.getEntry("tx");
+    tyEntry = limelightTable.getEntry("ty");
+    tvEntry = limelightTable.getEntry("tv");
+    ledModeEntry = limelightTable.getEntry("ledMode");
+    camModeEntry = limelightTable.getEntry("camMode");
+    setDefaultCommand(new RunCommand(this::trackingOff, this));
   }
 
   /**
@@ -51,7 +56,12 @@ public class Limelight extends SubsystemBase implements Loggable {
    * @param driverMode True to enable driver mode, false to disable driver mode.
    */
   public void setDriverMode(boolean driverMode) {
-
+    if (driverMode) {
+      camModeEntry.setNumber(1);
+    }
+    else {
+      camModeEntry.setNumber(0);
+    }
   }
 
   /**
@@ -75,6 +85,16 @@ public class Limelight extends SubsystemBase implements Loggable {
 
   public void ledsOff() {
     setLED(false);
+  }
+
+  public void trackingOn() {
+    setLED(true);
+    setDriverMode(false);
+  }
+
+  public void trackingOff() {
+    setLED(false);
+    setDriverMode(true);
   }
 
   public boolean hasTarget() {
@@ -114,5 +134,13 @@ public class Limelight extends SubsystemBase implements Loggable {
     
       filteredDistanceMeters = distanceFilter.calculate(distance);
       filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(targetX));
+  }
+
+  /** 
+   * Returns a long-running Command that keeps the LEDs on for as long as the command is running, but does not add the Limelight to the requirements
+   */
+  public Command ledsOnC() {
+    // ProxyScheduleCommand: Run a separate command (not part of whatever group this is in), but end that command when this one ends.
+    return new ProxyScheduleCommand(new RunCommand(this::trackingOn, this));
   }
 }

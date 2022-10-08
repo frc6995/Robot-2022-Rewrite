@@ -15,7 +15,6 @@ import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
 
 public class TiltClimberS extends SubsystemBase implements Loggable {
-  // TODO Have students make this subsystem like LinearClimberS
   private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.DOUBLE_SOLENOID_CLIMBER_FORWARD, 
   Constants.DOUBLE_SOLENOID_CLIMBER_BACK);
 
@@ -41,5 +40,29 @@ public class TiltClimberS extends SubsystemBase implements Loggable {
     // if(Math.abs(backSparkMax.getAppliedOutput()) < 0.1 && backSparkMax.getEncoder().getVelocity() > 10) {
     //   holdBack();
     // }
+  }
+
+  /**
+   * NOTE: this will not run if the climber is locked!
+   * @return the Command to tilt the climber forward
+   */
+  public Command forwardTiltC() {
+    return new RunEndCommand(this::tiltForward, this::tiltStop, this);
+  }
+
+  /**
+   * NOTE: this will not run if the climber is locked!
+   * @return the Command to tilt the climber back
+   */
+  public Command backwardTiltC() {
+    return new RunEndCommand(this::tiltBack, this::tiltStop, this);
+  }
+
+  /**
+   * NOTE: Default Command for TiltClimberS.
+   * @return the Command to stop the climber tilt at its current position.
+   */
+  public Command stopTiltC() {
+    return new InstantCommand(this::tiltStop, this);
   }
 }

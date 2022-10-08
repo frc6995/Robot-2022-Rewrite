@@ -41,7 +41,6 @@ import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.Logger;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -414,13 +413,33 @@ public class TurretS extends SubsystemBase implements Loggable {
   /**
    * Creates a command that minimizes the error externally supplied through the given DoubleSupplier. Use this for Limelight.
    * 
-   * Positive error means the turret should turn CCW
-   * @param error
+   * 
+   * @param error The error in radians. Positive error means the turret should turn CCW
    * @return
    */
   public Command zeroErrorC(DoubleSupplier error) {
-    return turnAngleC(()->(
-        this.getEncoderCounts()+error.getAsDouble())
-      );
+    return manualC(()->{return Constants.TURRET_P * error.getAsDouble();});
+  }
+
+  /**
+   * Creates a command that minimizes the error externally supplied through the given DoubleSupplier.
+   * Also includes a manual override speed input. If this speed is greater than 0, it will be used in place of the error calc.
+   * 
+   * 
+   * @param limelightOffset A Supplier for the error in radians. Positive error means the turret should turn CCW
+   * @param manualSpeed A Supplier for a manual override speed. (Positive means CCW)
+   *  
+   * @return
+   */
+  public Command aimWithLimelight(DoubleSupplier limelightOffset, DoubleSupplier manualSpeed) {
+    return new RunEndCommand(()->{
+      if (Math.abs(manualSpeed.getAsDouble()) > 0.05) {
+        this.setSpeed(manualSpeed.getAsDouble());
+      }
+      else {
+        this.setSpeed(Constants.TURRET_P * limelightOffset.getAsDouble());
+      }
+    }
+    , this::resetPID, this);
   }
 }

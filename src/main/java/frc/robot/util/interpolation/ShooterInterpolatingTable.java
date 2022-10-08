@@ -24,12 +24,12 @@ public class ShooterInterpolatingTable {
   private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(Map.ofEntries(
       // entry(2.3 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550,
       // 1.0)),
-      entry(2.5 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550, 1.0)),
-      entry(2.65 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550, 1.0)),
-      entry(2.9 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1600, 1600, 1.0)),
-      entry(3.52 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1700, 1700, 1.0)),
-      entry(4.00 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1800, 1800, 1.0)),
-      entry(4.6 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900, 1.0))
+      entry(2.5 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550)),
+      entry(2.65 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550)),
+      entry(2.9 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1600, 1600)),
+      entry(3.52 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1700, 1700)),
+      entry(4.00 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1800, 1800)),
+      entry(4.6 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900))
   ));
       
   // entry(5.4 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900,
@@ -50,4 +50,7 @@ public class ShooterInterpolatingTable {
         (distance - floorEntry.getKey()) / (ceilEntry.getKey() - floorEntry.getKey()));
   }
 
+  public static boolean getInRange(double distance) {
+    return distance > MIN_DISTANCE && distance < MAX_DISTANCE;
+  }
 }

@@ -9,7 +9,6 @@ import java.util.function.DoubleSupplier;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -21,11 +20,11 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.util.command.RunEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.LightsManager.States;
+import frc.robot.subsystems.LightS.States;
 import frc.robot.util.SimEncoder;
+import frc.robot.util.command.RunEndCommand;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -195,7 +194,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     if(isMoving()) {
-      LightsManager.getInstance().requestState(States.Shooting);
+      LightS.getInstance().requestState(States.Shooting);
     }
   }
 

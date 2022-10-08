@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -170,8 +171,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   /**
    * Velocity PID controllers for both drivebase sides.
    */
+  @Log(methodName = "getSetpoint", name = "leftVeloSetpt")
   public final PIDController leftPID = new PIDController(P, 0, 0);
+  @Log(methodName = "getSetpoint", name = "rightVeloSetpt")
   public final PIDController rightPID = new PIDController(P, 0, 0);
+  
 
   /**
    * The gyro sensor. This sits in the middle of the bot and tracks the heading (turning angle) of the robot.
@@ -223,7 +227,14 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     burnFlash();
 
 
-    SmartDashboard.putBoolean("requestPoseReset", false);
+    Shuffleboard.getTab("DrivebaseS")
+    .add("requestPoseReset", false) //Add the boolean to Shuffleboard.
+    .getEntry()
+    .addListener((notif)->{ // Add a listener for changes to the value.
+      if(notif.value.getBoolean()) { // If the value changes to true, 
+        resetRobotPose(this.START_POSE); // reset encoder
+      }
+    }, 0);
 
     if (RobotBase.isSimulation()) {
       m_driveSim = new DifferentialDrivetrainSim(
@@ -316,8 +327,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void tankDrive(double left, double right) {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
-    frontLeft.setVoltage(left * 6.5);
-    frontRight.setVoltage(right * 6.5);
+    tankDriveVolts(left * 12, right * 12);
   }
 
   /**
@@ -326,8 +336,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * @param rightVelocityMPS
    */
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
-    SmartDashboard.putNumber("leftVelo", leftVelocityMPS);
-    SmartDashboard.putNumber("rightVelo", rightVelocityMPS);
     tankDriveVolts(
       leftFF.calculate(leftVelocityMPS) + leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
       rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));

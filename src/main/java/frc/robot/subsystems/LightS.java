@@ -6,11 +6,15 @@ package frc.robot.subsystems;
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class LightsManager {
+public class LightS extends SubsystemBase {
 
     //===INTERNAL CONSTANTS===
 
@@ -37,14 +41,14 @@ public class LightsManager {
     public static final int PWM_PORT_LED = Constants.PWM_PORT_LED;
 
 
-  private static LightsManager m_instance = new LightsManager();
+  private static LightS m_instance = new LightS();
   private Spark spark = new Spark(PWM_PORT_LED);
 
   /** Creates a new LightsManager. */
-  private LightsManager() {
+  private LightS() {
   }
 
-  public static LightsManager getInstance() {
+  public static LightS getInstance() {
       return m_instance;
   }
 
@@ -88,9 +92,20 @@ public class LightsManager {
    * Periodically checks the current state of the robot and sets the LEDs to the
    * corresponding light pattern
    */
+  @Override
   public void periodic() {
     requestState(States.Default);
     spark.set(m_states.first().lightSpeed);
     m_states.removeAll(Set.of(States.values()));
+  }
+
+  /**
+   * Returns a Command to request a state from the lights.
+   * Because the lights have their own priority manager, this does NOT require the LightS.
+   * @param stateSupplier
+   * @return
+   */
+  public Command requestStateC(Supplier<States> stateSupplier) {
+    return new RunCommand(() -> m_instance.requestState(stateSupplier.get()));
   }
 }

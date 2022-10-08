@@ -4,15 +4,12 @@
 
 package frc.robot.subsystems.climb;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
-
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.LightsManager;
-import frc.robot.subsystems.LightsManager.States;
-import frc.robot.util.command.RunEndCommand;
+import frc.robot.subsystems.LightS;
+import frc.robot.subsystems.LightS.States;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -61,18 +58,14 @@ public class SuperClimberS implements Loggable {
    * @return the Command to extend the Thrifty climbers at bar-transferring speed.
    */  
   public Command transferBackC() {
-    return errorClimberC(
-      new RunEndCommand(thriftyClimberS::transferBack, thriftyClimberS::stopBack, thriftyClimberS)
-    );
+    return errorClimberC(thriftyClimberS.transferBackC());
   }
   /**
    * NOTE: this will not run if the climber is locked!
    * @return the Command to extend the Thrifty climbers
    */  
   public Command extendBackC() {
-    return errorClimberC(
-      new RunEndCommand(thriftyClimberS::extendBack, thriftyClimberS::stopBack, thriftyClimberS)
-    );
+    return errorClimberC(thriftyClimberS.extendBackC());
   }
 
   /**
@@ -80,7 +73,7 @@ public class SuperClimberS implements Loggable {
    * @return the Command to retract the Thrifty climbers
    */  
   public Command retractBackC() {
-    return errorClimberC(new RunEndCommand(thriftyClimberS::retractBack, thriftyClimberS::stopBack, thriftyClimberS));
+    return errorClimberC(thriftyClimberS.retractBackC());
   }
 
   /**
@@ -88,7 +81,7 @@ public class SuperClimberS implements Loggable {
    * @return the Command to stop the Thrifty Climbers
    */  
   public Command stopBackC() { // We can skip the error check if we're just stopping it.
-    return new InstantCommand(thriftyClimberS::stopBack, thriftyClimberS);
+    return thriftyClimberS.stopBackC();
   }
 
   // Front Linear Climber
@@ -129,7 +122,7 @@ public class SuperClimberS implements Loggable {
    * @return the Command to tilt the climber forward
    */
   public Command forwardTiltC() {
-    return errorClimberC(new RunEndCommand(tiltClimberS::tiltForward, tiltClimberS::tiltStop, tiltClimberS));
+    return errorClimberC(tiltClimberS.forwardTiltC());
   }
 
   /**
@@ -137,7 +130,7 @@ public class SuperClimberS implements Loggable {
    * @return the Command to tilt the climber back
    */
   public Command backwardTiltC() {
-    return errorClimberC(new RunEndCommand(tiltClimberS::tiltBack, tiltClimberS::tiltStop, tiltClimberS));
+    return errorClimberC(tiltClimberS.backwardTiltC());
   }
 
   /**
@@ -145,7 +138,7 @@ public class SuperClimberS implements Loggable {
    * @return the Command to stop the climber tilt at its current position.
    */
   public Command stopTiltC() {
-    return new InstantCommand(tiltClimberS::tiltStop, tiltClimberS);
+    return tiltClimberS.stopTiltC();
   }
   /**
    * A utility method to create a command that runs the attempted command if the climber is not locked,
@@ -165,7 +158,7 @@ public class SuperClimberS implements Loggable {
       new ScheduleCommand( 
         new RunCommand(
         ()->
-          LightsManager.getInstance().requestState(States.Error) // Request error states on the lights every loop...
+          LightS.getInstance().requestState(States.Error) // Request error states on the lights every loop...
       ).withTimeout(0.5)), // for 0.5 sec
       attemptCommand, // If condition is false, run the attempted command.
       this::getIsLocked // The condition is true if the climbers are locked.

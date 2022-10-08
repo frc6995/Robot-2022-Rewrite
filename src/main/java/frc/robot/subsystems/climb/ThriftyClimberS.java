@@ -74,4 +74,36 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
     //   holdBack();
     // }
   }
+
+  /**
+   * NOTE: this will not run if the climber is locked!
+   * @return the Command to extend the Thrifty climbers at bar-transferring speed.
+   */  
+  public Command transferBackC() {
+    return new RunEndCommand(this::transferBack, this::stopBack, this);
+  }
+  /**
+   * NOTE: this will not run if the climber is locked!
+   * @return the Command to extend the Thrifty climbers
+   */  
+  public Command extendBackC() {
+    return new RunEndCommand(this::extendBack, this::stopBack, this);
+  }
+
+  /**
+   * NOTE: this will not run if the climber is locked!
+   * @return the Command to retract the Thrifty climbers
+   */  
+  public Command retractBackC() {
+    return new RunEndCommand(this::retractBack, this::stopBack, this);
+  }
+
+  /**
+   * NOTE: Default Command for ThriftyClimberS
+   * @return the Command to stop the Thrifty Climbers
+   */  
+  public Command stopBackC() { // We can skip the error check if we're just stopping it.
+    return new InstantCommand(this::stopBack, this);
+  }
+
 }
