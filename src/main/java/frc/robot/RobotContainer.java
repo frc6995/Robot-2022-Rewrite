@@ -230,7 +230,7 @@ public class RobotContainer implements Loggable {
     climberTransferButton.whileActiveContinuous(climberS.transferBackC());
 
     // toggle climber lock when pressing operator start
-    climberLockButton.toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
+    climberLockButton.toggleWhenActive(new StartEndCommand(climberS::lock, climberS::unlock));
   }
 
   /**
