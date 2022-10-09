@@ -180,14 +180,14 @@ Else:
   }
 
   public Command shootC(BooleanSupplier isShooterAtTarget) {
-      return new RunCommand(()->{
+      return new RunEndCommand(()->{
         if (isShooterAtTarget.getAsBoolean()) {
           feed();
         }
         else {
           stop();
         }
-      }, this);
+      }, this::stop, this);
   }
 
   public Command idleC() {

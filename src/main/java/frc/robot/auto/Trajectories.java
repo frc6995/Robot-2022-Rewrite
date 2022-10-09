@@ -35,7 +35,7 @@ public class Trajectories {
                 4))
         .addConstraint(
             new CentripetalAccelerationConstraint(
-                2));
+                3));
 
   }
 

@@ -52,9 +52,9 @@ public class AutoCommandFactory {
         })
         .andThen(
          new ParallelCommandGroup(
-            shooterS.spinVelocityC(()->1750, ()->1750),
+            shooterS.spinDistanceC(()->3.0),
             new ParallelCommandGroup(
-                drivebaseS.timedDriveC(0.4, 1.5),
+                drivebaseS.timedDriveC(0.2, 1.5),
                 new ParallelCommandGroup(midtakeS.intakeC(), intakeS.deployAndSpinC())
                     .withTimeout(2.25)
             ).andThen(
@@ -66,15 +66,15 @@ public class AutoCommandFactory {
     }
 
 
-  public static Command fourBallAutoTrajectoryC(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS,
-      TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
+  public static Command fourBallAutoTrajectoryC(ShooterS shooterS, IntakeS intakeS, 
+  MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
     return new InstantCommand(
         () -> {
           drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
         })
     .andThen(
         new ParallelCommandGroup(
-            shooterS.spinVelocityC(() -> (1700), () -> (1700)),
+            shooterS.spinDistanceC(()->3.0),
             turretS.aimWithLimelight(limelightS::getFilteredXOffset, ()->0),
             new SequentialCommandGroup(
                 new ParallelDeadlineGroup(
@@ -82,7 +82,7 @@ public class AutoCommandFactory {
                         midtakeS.intakeC(),
                         intakeS.deployAndSpinC()
                 ),
-                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3),
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(2),
                         // End Two Ball Auto
                         // Turn a little bit
                 new ParallelDeadlineGroup(
@@ -95,7 +95,7 @@ public class AutoCommandFactory {
                     midtakeS.intakeC(),
                     intakeS.deployAndSpinC()
                 ),
-                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3)
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(2)
             )
         )
     );                // Intake Second Ball     

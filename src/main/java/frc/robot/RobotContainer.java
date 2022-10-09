@@ -211,6 +211,7 @@ public class RobotContainer implements Loggable {
       new ParallelCommandGroup(
         turretS.turnAngleC(()->Math.PI),
         lightS.requestStateC(()->States.Climbing)));
+    driverController.b().whenActive(new InstantCommand(shooterS::simSpeedDrop));
       
     createClimberCommandBindings();
   }
@@ -240,7 +241,7 @@ public class RobotContainer implements Loggable {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return AutoCommandFactory.twoBallAutoC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS);
+    return AutoCommandFactory.fourBallAutoTrajectoryC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS);
   }
 
   public void periodic() {
