@@ -162,11 +162,11 @@ public class RobotContainer implements Loggable {
     // INTAKE
 
     // We create a trigger that toggles true-false when Driver A is pressed
-    TriggerUtil.toggle(intakeToggleButton) 
+    intakeToggleButton
     // when that toggled trigger is true AND (shootButton is NOT true)
     // i.e., when intaking and not shooting
     .and(shootButton.negate())
-    .whenActive(
+    .whileActiveContinuous(
       // Requires: intakeS, midtakeS
       new ParallelCommandGroup(
         intakeS.deployAndSpinC(),
@@ -202,7 +202,7 @@ public class RobotContainer implements Loggable {
     );
     // Pulses the midtake while the shoot trigger is held down.
     // Requires: midtakeS
-    shootButton.whileActiveContinuous(midtakeS.shootC());
+    shootButton.whileActiveContinuous(midtakeS.shootC(shooterS.atTargetTrigger));
 
     // Climber lock on turret, with accompanying lights.
     // We set this whileActiveOnce so that it can be interrupted (i.e. by spinup), but won't go back to the default command.

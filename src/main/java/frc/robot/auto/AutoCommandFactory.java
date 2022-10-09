@@ -58,7 +58,7 @@ public class AutoCommandFactory {
                 new ParallelCommandGroup(midtakeS.intakeC(), intakeS.deployAndSpinC())
                     .withTimeout(2.25)
             ).andThen(
-                midtakeS.shootC().withTimeout(5)
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(5)
             )
         )
         )
@@ -82,7 +82,7 @@ public class AutoCommandFactory {
                         midtakeS.intakeC(),
                         intakeS.deployAndSpinC()
                 ),
-                midtakeS.feedC().withTimeout(3),
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3),
                         // End Two Ball Auto
                         // Turn a little bit
                 new ParallelDeadlineGroup(
@@ -95,7 +95,7 @@ public class AutoCommandFactory {
                     midtakeS.intakeC(),
                     intakeS.deployAndSpinC()
                 ),
-                midtakeS.feedC().withTimeout(3)
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3)
             )
         )
     );                // Intake Second Ball     

@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
@@ -10,6 +12,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -176,16 +179,15 @@ Else:
     );
   }
 
-  public Command shootC() {
-    return new SequentialCommandGroup(
-    feedC().withTimeout(0.2),
-          new WaitCommand(1.25),
-      new RepeatCommand(
-        new SequentialCommandGroup(
-          feedC().withTimeout(0.25),
-          new WaitCommand(1.25)
-        )
-      ));
+  public Command shootC(BooleanSupplier isShooterAtTarget) {
+      return new RunCommand(()->{
+        if (isShooterAtTarget.getAsBoolean()) {
+          feed();
+        }
+        else {
+          stop();
+        }
+      }, this);
   }
 
   public Command idleC() {

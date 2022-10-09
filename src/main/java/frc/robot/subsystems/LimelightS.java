@@ -121,6 +121,7 @@ public class LimelightS extends SubsystemBase implements Loggable {
    */
   @Override
   public void periodic() {
+    if (tvEntry.getNumber(0).doubleValue() == 1) {
     double targetY = tyEntry.getNumber(0).doubleValue();
     double targetX = -txEntry.getNumber(0).doubleValue(); // flip to CCW positive
 
@@ -135,6 +136,7 @@ public class LimelightS extends SubsystemBase implements Loggable {
     
       filteredDistanceMeters = distanceFilter.calculate(distance);
       filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(targetX));
+    }
   }
 
   /** 

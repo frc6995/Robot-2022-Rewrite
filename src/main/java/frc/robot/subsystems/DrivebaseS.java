@@ -303,17 +303,17 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void curvatureDrive(double fwdBack, double turn) {
     fwdBack = MathUtil.applyDeadband(fwdBack, 0.02);
     turn = MathUtil.applyDeadband(turn, 0.05);
-    fwdBack = fwdBack * 6.5 / 12;
     fwdBack = fwdBackLimiter.calculate(fwdBack);
+    fwdBack = fwdBack * 6.5 / 12;
     turn = turnLimiter.calculate(turn);
 
     boolean quickTurn = false;
     if (fwdBack == 0) {
       quickTurn = true;
-      turn *= 0.35;
+      turn *= 0.15;
     }
     else {
-      turn *= 0.8;
+      turn *= 0.4;
     }
     WheelSpeeds speeds = DifferentialDrive.curvatureDriveIK(fwdBack, turn, quickTurn);
     tankDrive(speeds.left, speeds.right);

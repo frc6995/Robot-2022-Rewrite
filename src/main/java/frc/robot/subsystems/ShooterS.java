@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.subsystems.LightS.States;
 import frc.robot.util.SimEncoder;
@@ -58,6 +59,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
     SHOOTER_BACK_FF[0],
     SHOOTER_BACK_FF[1],
     SHOOTER_BACK_FF[2]);
+    private PIDController frontPID = new PIDController(Constants.SHOOTER_FRONT_P, 0,0);
   private PIDController backPID = new PIDController(Constants.SHOOTER_BACK_P, 0,0);
   private SimEncoder frontSimEncoder = new SimEncoder();
   private SimEncoder backSimEncoder = new SimEncoder();
@@ -66,8 +68,9 @@ public class ShooterS extends SubsystemBase implements Loggable {
         Units.radiansToRotations(SHOOTER_BACK_FF[1]), 
         Units.radiansToRotations(SHOOTER_BACK_FF[2])), 
         DCMotor.getNEO(1), 1);
-  private double frontSetpoint = 0;
+  private double frontSetpointRPS = 0;
   private double backSetpointRPS = 0;
+  public final Trigger atTargetTrigger = new Trigger(this::isAtTarget);
   
   /** Creates a new ShooterS. */
   public ShooterS() {
@@ -136,8 +139,9 @@ public class ShooterS extends SubsystemBase implements Loggable {
    * @param frontTargetRPM The target RPM of the front motor
    */
   public void setFrontVelocity(double frontTargetRPM) {
-    frontSetpoint = frontTargetRPM;
-    setFrontVolts(frontFF.calculate(frontTargetRPM / 60.0));
+    frontSetpointRPS = frontTargetRPM / 60.0;
+    setFrontVolts(frontFF.calculate(frontSetpointRPS) + frontPID.calculate(
+      getFrontEncoderSpeed() / 60.0, frontSetpointRPS));
 
   }
 
@@ -168,7 +172,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public boolean isFrontAtTarget() {
-    return Math.abs(frontSetpoint - getFrontEncoderSpeed()) < Constants.SHOOTER_PID_ERROR;
+    return  frontPID.getVelocityError() < Constants.SHOOTER_PID_ERROR;
   }
 
   /**
@@ -178,7 +182,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public boolean isBackAtTarget() {
-    return Math.abs(backSetpointRPS - getBackEncoderSpeed()) < Constants.SHOOTER_PID_ERROR;
+    return backPID.getVelocityError() < Constants.SHOOTER_PID_ERROR;
   }
 
   /**

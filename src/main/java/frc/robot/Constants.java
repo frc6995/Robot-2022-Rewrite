@@ -167,7 +167,7 @@ public final class Constants {
   public static final int[] SHOOTER_BACK_ENCODER = {8,9};
 
   /** Allowable error to still be on target */
-  public static final double SHOOTER_PID_ERROR = 100; // rpm
+  public static final double SHOOTER_PID_ERROR = 200; // rpm
 
   // Turret Constants
 
@@ -235,7 +235,7 @@ public final class Constants {
   public static final double MIDTAKE_LOADING_VOLTS = 0.3 * 12;
 
   /** Midtake feeding speed */
-  public static final double MIDTAKE_FEEDING_VOLTS = 0.6 * 12;
+  public static final double MIDTAKE_FEEDING_VOLTS = 4;
 
   /** Midtake crawling speed, default behavior if no ball is detected. */
   public static final double MIDTAKE_CRAWL_VOLTS = 0.1 * 12;

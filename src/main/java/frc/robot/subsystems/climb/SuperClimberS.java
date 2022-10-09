@@ -31,6 +31,7 @@ public class SuperClimberS implements Loggable {
     thriftyClimberS.setDefaultCommand(stopBackC().perpetually());
     linearClimberS.setDefaultCommand(stopFrontC().perpetually());
     tiltClimberS.setDefaultCommand(stopTiltC().perpetually());
+    unlock();
   }
 
   /**
@@ -155,12 +156,13 @@ public class SuperClimberS implements Loggable {
       // that is not actually part of executing the ConditionalCommand.
       // This means that errorClimberC will end instantly if the climber is locked,
       // and the lights command will run separately for its 0.5 seconds.
+      attemptCommand,
       new ScheduleCommand( 
         new RunCommand(
         ()->
           LightS.getInstance().requestState(States.Error) // Request error states on the lights every loop...
       ).withTimeout(0.5)), // for 0.5 sec
-      attemptCommand, // If condition is false, run the attempted command.
+      // If condition is false, run the attempted command.
       this::getIsLocked // The condition is true if the climbers are locked.
     );
   }

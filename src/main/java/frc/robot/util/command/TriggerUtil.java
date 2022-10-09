@@ -41,22 +41,6 @@ public class TriggerUtil {
         );
     }
 
-    public static Trigger toggle(BooleanSupplier condition) {
-        return new Trigger(
-            new BooleanSupplier() {
-                private boolean m_value = condition.getAsBoolean();
-
-                @Override
-                public boolean getAsBoolean() {
-                    boolean currentValue = condition.getAsBoolean();
-                    if (currentValue) {
-                        m_value = ! m_value;
-                    }
-                    return m_value;
-                }
-            }
-        );
-    }
 
     public static Trigger asButton(DoubleSupplier axis, double threshold) {
         return new Trigger(()->axis.getAsDouble() > threshold);

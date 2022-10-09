@@ -17,19 +17,16 @@ public class ShooterInterpolatingTable {
   private ShooterInterpolatingTable() {
   }
 
-  public static final double MIN_DISTANCE = 2.5;
+  public static final double MIN_DISTANCE = 2.79;
   public static final double MAX_DISTANCE = 4.3;
 
   // Interpolating tree map
   private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(Map.ofEntries(
-      // entry(2.3 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550,
-      // 1.0)),
-      entry(2.5 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550)),
-      entry(2.65 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550)),
-      entry(2.9 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1600, 1600)),
-      entry(3.52 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1700, 1700)),
-      entry(4.00 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1800, 1800)),
-      entry(4.6 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900))
+      entry(2.79 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(2500, 3000)),
+      entry(3.42 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(2700, 2700)),
+      entry(4.1 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3000, 3000))
+      // 4.1 - 3000
+      //2.79 - 2400/2900
   ));
       
   // entry(5.4 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900,
