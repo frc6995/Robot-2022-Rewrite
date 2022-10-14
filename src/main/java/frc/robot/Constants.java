@@ -235,7 +235,7 @@ public final class Constants {
   public static final double MIDTAKE_LOADING_VOLTS = 0.3 * 12;
 
   /** Midtake feeding speed */
-  public static final double MIDTAKE_FEEDING_VOLTS = 4;
+  public static final double MIDTAKE_FEEDING_VOLTS = 3.5;
 
   /** Midtake crawling speed, default behavior if no ball is detected. */
   public static final double MIDTAKE_CRAWL_VOLTS = 0.1 * 12;

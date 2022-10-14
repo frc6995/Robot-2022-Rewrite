@@ -437,7 +437,7 @@ public class TurretS extends SubsystemBase implements Loggable {
         this.setSpeed(manualSpeed.getAsDouble());
       }
       else {
-        this.setVoltage(turretFF.calculate((-limelightOffset.getAsDouble())));
+        this.setVoltage(turretFF.calculate((-limelightOffset.getAsDouble() * 6)));
       }
     }
     , this::resetPID, this);

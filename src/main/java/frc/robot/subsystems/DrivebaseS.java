@@ -340,8 +340,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    */
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
     tankDriveVolts(
-      leftFF.calculate(leftVelocityMPS) + leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
-      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));
+      leftFF.calculate(leftVelocityMPS)/* + leftPID.calculate(getLeftVelocity(), leftVelocityMPS)*/,
+      rightFF.calculate(rightVelocityMPS)/* + rightPID.calculate(getRightVelocity(), rightVelocityMPS)*/);
   }
 
   /**

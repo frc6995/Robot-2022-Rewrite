@@ -10,8 +10,11 @@ import java.util.function.DoubleSupplier;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
@@ -206,13 +209,21 @@ public class ShooterS extends SubsystemBase implements Loggable {
     return getFrontEncoderSpeed() > 100 && getBackEncoderSpeed() > 100;
   }
 
+  public void simSpeedDrop(){
+    Matrix<N1, N1> newFrontState = new Matrix<N1, N1>(Nat.N1(), Nat.N1()); 
+    newFrontState.set(0, 0, Units.rotationsPerMinuteToRadiansPerSecond(getFrontEncoderSpeed() - 500));
+    Matrix<N1, N1> newBackState = new Matrix<N1, N1>(Nat.N1(), Nat.N1()); 
+    newBackState.set(0, 0, Units.rotationsPerMinuteToRadiansPerSecond(getBackEncoderSpeed() - 500));
+    frontSim.setState(newFrontState);
+    backSim.setState(newBackState);
+  }
+
   @Override
   public void simulationPeriodic() {
     frontSim.setInput(frontSparkMax.getAppliedOutput() - 
       (Math.signum(frontSparkMax.getAppliedOutput()) * SHOOTER_FRONT_FF[0]));
     backSim.setInput(backSparkMax.getAppliedOutput() - 
       (Math.signum(backSparkMax.getAppliedOutput()) * SHOOTER_BACK_FF[0]));
-    
     frontSim.update(0.02);
     backSim.update(0.02);
 

@@ -22,11 +22,15 @@ public class ShooterInterpolatingTable {
 
   // Interpolating tree map
   private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(Map.ofEntries(
-      entry(2.79 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(2500, 3000)),
-      entry(3.42 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(2700, 2700)),
-      entry(4.1 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3000, 3000))
-      // 4.1 - 3000
-      //2.79 - 2400/2900
+      
+      entry(2.74 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3300, 2400)),
+      entry(3.1 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3400, 2500)),
+      entry(4 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3400, 3100)),
+      entry(5 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(3500, 3500))
+      // 2.74 -3300, 2400
+      // 3.1 - 3400, 2500
+      //5 - 3500
+
   ));
       
   // entry(5.4 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900,

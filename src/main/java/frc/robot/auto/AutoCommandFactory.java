@@ -51,40 +51,52 @@ public class AutoCommandFactory {
           drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
         })
         .andThen(
-         new ParallelCommandGroup(
-            shooterS.spinVelocityC(()->1750, ()->1750),
             new ParallelCommandGroup(
-                drivebaseS.timedDriveC(0.4, 1.5),
-                new ParallelCommandGroup(midtakeS.intakeC(), intakeS.deployAndSpinC())
-                    .withTimeout(2.25)
-            ).andThen(
-                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(5)
+                // Limelight on
+                // turret aim
+                //shooter interpolate
+                limelightS.ledsOnC(),
+                turretS.aimWithLimelight(()->limelightS.getFilteredXOffset() , ()->0),
+                shooterS.spinDistanceC(limelightS::getFilteredDistance),
+                // run trajectory 
+                new ParallelDeadlineGroup(
+                    drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
+                    intakeS.deployC()
+                ).andThen(            
+                        new ParallelCommandGroup(
+                            midtakeS.shootC(shooterS.atTargetTrigger), 
+                            intakeS.deployAndSpinC()
+                        ).withTimeout(3.25)
+                    )
+                        
+                )
             )
-        )
-        )
         .withName("Two Ball Auto");
     }
 
 
-  public static Command fourBallAutoTrajectoryC(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS,
-      TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
+  public static Command fourBallAutoTrajectoryC(ShooterS shooterS, IntakeS intakeS, 
+  MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
     return new InstantCommand(
         () -> {
           drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
         })
     .andThen(
-        new ParallelCommandGroup(
-            shooterS.spinVelocityC(() -> (1700), () -> (1700)),
-            turretS.aimWithLimelight(limelightS::getFilteredXOffset, ()->0),
+        new ParallelDeadlineGroup(
             new SequentialCommandGroup(
+                // First path while deploying (not spinning) intake
                 new ParallelDeadlineGroup(
-                        drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
-                        midtakeS.intakeC(),
+                    drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
+                    intakeS.deployC()
+                ).andThen(
+                    // Empty the midtake while bringing the third ball into the 
+                    new ParallelCommandGroup(
+                        midtakeS.shootC(shooterS.atTargetTrigger), 
                         intakeS.deployAndSpinC()
+                    ).withTimeout(3.25)
                 ),
-                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3),
-                        // End Two Ball Auto
-                        // Turn a little bit
+                
+                // Terminal retrieve and return while intaking
                 new ParallelDeadlineGroup(
                     new SequentialCommandGroup(
                         drivebaseS.ramseteC(Trajectories.MID_RING_TO_TERMINAL_PICKUP),
@@ -95,9 +107,13 @@ public class AutoCommandFactory {
                     midtakeS.intakeC(),
                     intakeS.deployAndSpinC()
                 ),
-                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(3)
-            )
+                midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(2)
+            ),
+
+            shooterS.spinDistanceC(limelightS::getFilteredDistance),
+            limelightS.ledsOnC(),
+            turretS.aimWithLimelight(()->limelightS.getFilteredXOffset(), ()->0)
         )
-    );                // Intake Second Ball     
+    );           
   }
 }

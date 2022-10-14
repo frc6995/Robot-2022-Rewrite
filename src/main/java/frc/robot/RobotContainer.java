@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -87,6 +88,8 @@ public class RobotContainer implements Loggable {
   driveSteerAxis,
   turretManualAxis;
 
+  @Log
+  SendableChooser<Command> autoChooser = new SendableChooser<Command>();
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -124,6 +127,8 @@ public class RobotContainer implements Loggable {
             driverController::getLeftX));
     midtakeS.setDefaultCommand(midtakeS.idleC());
 
+    autoChooser.setDefaultOption("2/3 Ball", AutoCommandFactory.twoBallAutoC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.addOption("4/5 Ball", AutoCommandFactory.fourBallAutoTrajectoryC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
 
   }
 
@@ -139,11 +144,11 @@ public class RobotContainer implements Loggable {
     climberTiltForwardButton = driverController.pov.left();
     climberTiltBackButton = driverController.pov.right();
 
-    climberExtendBackButton = operatorController.pov.up();
-    climberRetractBackButton = operatorController.pov.down();
+    climberExtendBackButton = operatorController.y();
+    climberRetractBackButton = operatorController.a();
 
-    climberExtendFrontButton = operatorController.y();
-    climberRetractFrontButton = operatorController.a();
+    climberExtendFrontButton = operatorController.pov.up();
+    climberRetractFrontButton = operatorController.pov.down();
 
     climberExtendBothButton = operatorController.x();
     climberTransferButton = operatorController.b();
@@ -183,7 +188,7 @@ public class RobotContainer implements Loggable {
         shooterS.spinDistanceC(limelightS::getFilteredDistance),
         limelightS.ledsOnC(), // will automatically turn off after command
         turretS.aimWithLimelight(
-          ()->-limelightS.getFilteredXOffset(), 
+          ()->limelightS.getFilteredXOffset(), 
           ()->MathUtil.applyDeadband(-operatorController.getRightX(), 0.05)
         ),
         lightS.requestStateC(
@@ -211,6 +216,7 @@ public class RobotContainer implements Loggable {
       new ParallelCommandGroup(
         turretS.turnAngleC(()->Math.PI),
         lightS.requestStateC(()->States.Climbing)));
+    //driverController.b().whenActive(new InstantCommand(shooterS::simSpeedDrop));
       
     createClimberCommandBindings();
   }
@@ -240,7 +246,7 @@ public class RobotContainer implements Loggable {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return AutoCommandFactory.twoBallAutoC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS);
+    return autoChooser.getSelected();
   }
 
   public void periodic() {
