@@ -20,24 +20,24 @@ import java.util.List;
 
 public class Trajectories {
 
-  public static final TrajectoryConfig getConfig() {
-    return new TrajectoryConfig(2.5, 1.25).setEndVelocity(0)
-        .addConstraint(
-            new DifferentialDriveVoltageConstraint(
-                new SimpleMotorFeedforward(
-                    Constants.DRIVEBASE_LINEAR_FF_MPS[0],
-                    Constants.DRIVEBASE_LINEAR_FF_MPS[1],
-                    Constants.DRIVEBASE_LINEAR_FF_MPS[2]),
-                Constants.DRIVEBASE_KINEMATICS, 10.0))
-        .addConstraint(
-            new DifferentialDriveKinematicsConstraint(
-                Constants.DRIVEBASE_KINEMATICS,
-                4))
-        .addConstraint(
-            new CentripetalAccelerationConstraint(
-                2));
-
-  }
+    public static final TrajectoryConfig getConfig() {
+        return new TrajectoryConfig(2.5, 1.5).setEndVelocity(0)
+            .addConstraint(
+                new DifferentialDriveVoltageConstraint(
+                    new SimpleMotorFeedforward(
+                        Constants.DRIVEBASE_LINEAR_FF_MPS[0],
+                        Constants.DRIVEBASE_LINEAR_FF_MPS[1],
+                        Constants.DRIVEBASE_LINEAR_FF_MPS[2]),
+                    Constants.DRIVEBASE_KINEMATICS, 10.0))
+            .addConstraint(
+                new DifferentialDriveKinematicsConstraint(
+                    Constants.DRIVEBASE_KINEMATICS,
+                    4))
+            .addConstraint(
+                new CentripetalAccelerationConstraint(
+                    2));
+    
+      }
 
   public static final Pose2d HUB_CENTER_POSE = new Pose2d(
       Units.inchesToMeters(324.0),
@@ -58,9 +58,9 @@ public class Trajectories {
           new Transform2d(
               HUB_CENTER_POSE, CARGO_RING_MID_OWN_BALL)),
       Units.inchesToMeters(5));
-  public static final Pose2d TERMINAL_BALL_PICKUP = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(225),
-      Units.inchesToMeters(8));
-      public static final Pose2d TERMINAL_BALL_RECEIVE = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(225),
+  public static final Pose2d TERMINAL_BALL_PICKUP = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(200),
+      Units.inchesToMeters(12));
+      public static final Pose2d TERMINAL_BALL_RECEIVE = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(200),
       Units.inchesToMeters(12));
 
   public static Pose2d pickup(Pose2d target, Rotation2d heading, double stopDistanceMeters) {

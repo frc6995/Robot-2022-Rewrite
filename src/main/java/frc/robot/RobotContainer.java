@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.auto.AutoCommandFactory;
+import frc.robot.auto.Trajectories;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LightS;
@@ -104,6 +105,7 @@ public class RobotContainer implements Loggable {
     configureButtonBindings();
     // start the USB camera
     CameraServer.startAutomaticCapture();
+    field.getObject("mid-terminal").setTrajectory(Trajectories.MID_RING_TO_TERMINAL_PICKUP);
     // Configure the button bindings
 
   }

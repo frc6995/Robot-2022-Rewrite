@@ -51,23 +51,24 @@ public class AutoCommandFactory {
           drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
         })
         .andThen(
-            new ParallelCommandGroup(
+            new ParallelDeadlineGroup(
                 // Limelight on
                 // turret aim
                 //shooter interpolate
-                limelightS.ledsOnC(),
-                turretS.aimWithLimelight(()->limelightS.getFilteredXOffset() , ()->0),
-                shooterS.spinDistanceC(limelightS::getFilteredDistance),
+               
                 // run trajectory 
                 new ParallelDeadlineGroup(
                     drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
                     intakeS.deployC()
                 ).andThen(            
-                        new ParallelCommandGroup(
-                            midtakeS.shootC(shooterS.atTargetTrigger), 
-                            intakeS.deployAndSpinC()
-                        ).withTimeout(3.25)
-                    )
+                    new ParallelCommandGroup(
+                        midtakeS.shootC(shooterS.atTargetTrigger), 
+                        intakeS.deployAndSpinC()
+                    ).withTimeout(3.25)
+                ),
+                limelightS.ledsOnC(),
+                turretS.aimWithLimelight(()->limelightS.getFilteredXOffset() , ()->0),
+                shooterS.spinDistanceC(limelightS::getFilteredDistance)
                         
                 )
             )
