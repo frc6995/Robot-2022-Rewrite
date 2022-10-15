@@ -60,7 +60,7 @@ public class AutoCommandFactory {
                 new ParallelDeadlineGroup(
                     drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
                     intakeS.deployC()
-                ).andThen(            
+                ).andThen(new WaitCommand(0.5)).andThen(            
                     new ParallelCommandGroup(
                         midtakeS.shootC(shooterS.atTargetTrigger), 
                         intakeS.deployAndSpinC()
@@ -89,12 +89,12 @@ public class AutoCommandFactory {
                 new ParallelDeadlineGroup(
                     drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
                     intakeS.deployC()
-                ).andThen(
+                ).andThen(new WaitCommand(0.5)).andThen(
                     // Empty the midtake while bringing the third ball into the 
                     new ParallelCommandGroup(
                         midtakeS.shootC(shooterS.atTargetTrigger), 
                         intakeS.deployAndSpinC()
-                    ).withTimeout(3.25)
+                    ).withTimeout(2.75)
                 ),
                 
                 // Terminal retrieve and return while intaking

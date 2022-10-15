@@ -235,7 +235,7 @@ public class RobotContainer implements Loggable {
     climberExtendBothButton.whileActiveContinuous(climberS.extendBackC().alongWith(climberS.extendFrontC()));
     climberExtendFrontButton.whileActiveContinuous(climberS.extendFrontC());
     climberRetractFrontButton.whileActiveContinuous(climberS.retractFrontC());
-    climberTransferButton.whileActiveContinuous(climberS.transferBackC());
+    climberTransferButton.whileActiveContinuous(climberS.transferBackC().alongWith(climberS.transferFrontC()));
 
     // toggle climber lock when pressing operator start
     climberLockButton.toggleWhenActive(new StartEndCommand(climberS::lock, climberS::unlock));

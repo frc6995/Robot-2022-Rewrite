@@ -26,17 +26,17 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
    * The forward soft limit extending the climber.
    * This is a float because of the Spark Max API.
    */
-  public static final float SOFT_LIMIT_FORWARD_REVS = 200.0f;
+  public static final float SOFT_LIMIT_FORWARD_REVS = 200.0f * 18.0f/19.0f;
   /**
    * The reverse soft limit for the climber (stopping above the shooter).
    * This is a float because of the Spark Max API.
    */
-  public static final float SOFT_LIMIT_MID_REVS = 55.0f;
+  public static final float SOFT_LIMIT_MID_REVS = 55.0f * 18.0f/19.0f;
   /**
    * The reverse soft limit for the climber (stopping almost at the hard stop).
    * This is a float because of the Spark Max API.
    */
-  public static final float SOFT_LIMIT_REVERSE_REVS = 14.0f;
+  public static final float SOFT_LIMIT_REVERSE_REVS = 14.0f  * 18.0f/19.0f;
   /**
    * The voltage applied when transferring.
    */

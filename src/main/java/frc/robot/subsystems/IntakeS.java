@@ -37,6 +37,8 @@ public class IntakeS extends SubsystemBase implements Loggable {
         intakeLeadMotor.restoreFactoryDefaults();
         intakeFollowerMotor.restoreFactoryDefaults();
         intakeFollowerMotor.follow(intakeLeadMotor, true);
+        intakeFollowerMotor.setSmartCurrentLimit(20);
+        intakeLeadMotor.setSmartCurrentLimit(20);
     }
 
     /**
