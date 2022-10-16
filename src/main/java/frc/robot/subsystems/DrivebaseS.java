@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.auto.Trajectories;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimEncoder;
 import frc.robot.util.command.RunEndCommand;
@@ -110,7 +111,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   /**
   * The proportional constant for the drivebase wheel.
   */
-  public static final double P = 8.6995;// 0.72534;//9.5653;
+  public static final double P = 2;//8.6995;// 0.72534;//9.5653;
 
   /**
   * The system modeling plant for the drivebase.
@@ -191,7 +192,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   /**
    * The initial pose of our 4-ball auto, in meters. See the discussion of field-relative coordinates in Trajectories.java
    */
-  public final Pose2d START_POSE = new Pose2d (6.67436, 2.651410, Rotation2d.fromDegrees(-155.055217));
+  public final Pose2d START_POSE = Trajectories.MID_BALL_START_POSE;
 
   //Sim stuff
   private DifferentialDrivetrainSim m_driveSim;
@@ -339,9 +340,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * @param rightVelocityMPS
    */
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
+    SmartDashboard.putNumber("leftVelo", leftVelocityMPS);
+    SmartDashboard.putNumber("rightVelo", rightVelocityMPS);
     tankDriveVolts(
-      leftFF.calculate(leftVelocityMPS)/* + leftPID.calculate(getLeftVelocity(), leftVelocityMPS)*/,
-      rightFF.calculate(rightVelocityMPS)/* + rightPID.calculate(getRightVelocity(), rightVelocityMPS)*/);
+      leftFF.calculate(leftVelocityMPS)+ leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
+      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));
   }
 
   /**

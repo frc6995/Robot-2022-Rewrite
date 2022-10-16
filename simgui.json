@@ -48,6 +48,10 @@
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
+        "Robot": {
+          "length": 0.7900000214576721,
+          "width": 0.7900000214576721
+        },
         "bottom": 903,
         "height": 8.229599952697754,
         "image": "C:\\Users\\jashu\\PathWeaver\\Games\\2022 Rapid React\\2022-field.png",
@@ -77,7 +81,8 @@
         },
         "field": {
           "open": true
-        }
+        },
+        "open": true
       },
       "SuperClimberS": {
         "LinearClimberS": {
@@ -142,6 +147,15 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/DrivebaseS/getLeftVelocity"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/leftVelo"
             }
           ]
         }
