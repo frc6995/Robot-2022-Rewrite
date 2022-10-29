@@ -87,7 +87,7 @@ public class AutoCommandFactory {
             new SequentialCommandGroup(
                 // First path while deploying (not spinning) intake
                 new ParallelDeadlineGroup(
-                    drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
+                    drivebaseS.ramseteC(Trajectories.FOUR_BALL_BACKUP_ONE),
                     intakeS.deployC()
                 ).andThen(new WaitCommand(0.5)).andThen(
                     // Empty the midtake while bringing the third ball into the 
@@ -100,10 +100,10 @@ public class AutoCommandFactory {
                 // Terminal retrieve and return while intaking
                 new ParallelDeadlineGroup(
                     new SequentialCommandGroup(
-                        drivebaseS.ramseteC(Trajectories.MID_RING_TO_TERMINAL_PICKUP),
+                        drivebaseS.ramseteC(Trajectories.FOUR_BALL_BACKUP_TWO),
                         drivebaseS.timedDriveC(-0.2, 0.5),
                         new WaitCommand(0.25),
-                        drivebaseS.ramseteC(Trajectories.TERMINAL_RECEIVE_TO_MID_RING)
+                        drivebaseS.ramseteC(Trajectories.FOUR_BALL_RETURN)
                     ),
                     midtakeS.intakeC(),
                     intakeS.deployAndSpinC()

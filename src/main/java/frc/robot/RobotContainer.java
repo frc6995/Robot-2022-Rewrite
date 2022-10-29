@@ -105,7 +105,7 @@ public class RobotContainer implements Loggable {
     configureButtonBindings();
     // start the USB camera
     CameraServer.startAutomaticCapture();
-    field.getObject("mid-terminal").setTrajectory(Trajectories.MID_RING_TO_TERMINAL_PICKUP);
+    field.getObject("mid-terminal").setTrajectory(Trajectories.FOUR_BALL_BACKUP_TWO);
     // Configure the button bindings
 
   }
@@ -172,7 +172,7 @@ public class RobotContainer implements Loggable {
     intakeToggleButton
     // when that toggled trigger is true AND (shootButton is NOT true)
     // i.e., when intaking and not shooting
-    .and(shootButton.negate())
+    // .and(shootButton.negate())
     .whileActiveContinuous(
       // Requires: intakeS, midtakeS
       new ParallelCommandGroup(

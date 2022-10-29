@@ -6,6 +6,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,6 +25,8 @@ public class IntakeS extends SubsystemBase implements Loggable {
     @Log(methodName = "getAppliedOutput", name = "inputVolts")
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,
             MotorType.kBrushless);
+    @Log(methodName = "getAppliedOutput", name = "followerVolts")
+    @Log(methodName = "getOutputCurrent", name = "followerAmps")
     private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR,
             MotorType.kBrushless);
     private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
@@ -36,7 +39,8 @@ public class IntakeS extends SubsystemBase implements Loggable {
         retract();
         intakeLeadMotor.restoreFactoryDefaults();
         intakeFollowerMotor.restoreFactoryDefaults();
-        intakeFollowerMotor.follow(intakeLeadMotor, true);
+        
+        //intakeFollowerMotor.follow(intakeLeadMotor, true);
     }
 
     /**
@@ -66,7 +70,9 @@ public class IntakeS extends SubsystemBase implements Loggable {
      * @param speed the speed
      */
     public void spin(double speed) {
+        SmartDashboard.putNumber("intake", speed);
         intakeLeadMotor.setVoltage(speed * 12);
+        intakeFollowerMotor.setVoltage(speed * -12);
     }
 
     /**

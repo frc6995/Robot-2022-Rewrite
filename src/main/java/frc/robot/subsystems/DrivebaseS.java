@@ -111,7 +111,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   /**
   * The proportional constant for the drivebase wheel.
   */
-  public static final double P = 2;//8.6995;// 0.72534;//9.5653;
+  public static final double P = 0;//2;//8.6995;// 0.72534;//9.5653;
 
   /**
   * The system modeling plant for the drivebase.
@@ -200,6 +200,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private SimEncoder m_rightEncoder = new SimEncoder();
   @Log(methodName = "getPosition", name = "getSimLeftPosition")
   private SimEncoder m_leftEncoder = new SimEncoder();
+  
+  @Log
+  public double leftVelocitySetpoint = 0;
+  @Log
+  public double rightVelocitySetpoint = 0;
 
 
   /** Creates a new DrivebaseS. */
@@ -340,11 +345,13 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * @param rightVelocityMPS
    */
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
-    SmartDashboard.putNumber("leftVelo", leftVelocityMPS);
-    SmartDashboard.putNumber("rightVelo", rightVelocityMPS);
-    tankDriveVolts(
-      leftFF.calculate(leftVelocityMPS)+ leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
-      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));
+    double leftAccel = (leftVelocityMPS - leftVelocitySetpoint) / 0.02;
+    double rightAccel = (rightVelocityMPS - rightVelocitySetpoint) / 0.02;
+    leftVelocitySetpoint = leftVelocityMPS;
+    rightVelocitySetpoint = rightVelocityMPS;
+    tankDriveVoltsInternal(
+      leftFF.calculate(leftVelocityMPS, leftAccel)+ leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
+      rightFF.calculate(rightVelocityMPS, rightAccel) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));
   }
 
   /**
@@ -481,9 +488,15 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
+    leftVelocitySetpoint = (leftVolts - LINEAR_FF_MPS[0]) / LINEAR_FF_MPS[1];
+    rightVelocitySetpoint = (rightVolts - LINEAR_FF_MPS[0]) / LINEAR_FF_MPS[1];
+    tankDriveVoltsInternal(leftVolts, rightVolts);
+  }
+
+  private void tankDriveVoltsInternal(double leftVolts, double rightVolts) {
     if(RobotBase.isSimulation()) {
-        leftVolts = NomadMathUtil.subtractkS(leftVolts, LINEAR_FF_MPS[0]);
-        rightVolts = NomadMathUtil.subtractkS(rightVolts, LINEAR_FF_MPS[0]);
+      leftVolts = NomadMathUtil.subtractkS(leftVolts, LINEAR_FF_MPS[0]);
+      rightVolts = NomadMathUtil.subtractkS(rightVolts, LINEAR_FF_MPS[0]);
     }
     frontLeft.setVoltage(leftVolts);
     frontRight.setVoltage(rightVolts);

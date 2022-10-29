@@ -13,6 +13,7 @@ import edu.wpi.first.math.trajectory.constraint.DifferentialDriveKinematicsConst
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.util.NomadMathUtil;
 
 import static frc.robot.util.NomadMathUtil.*;
 
@@ -99,5 +100,30 @@ public class Trajectories {
       List.of(),
       MID_BALL_HUB_SIDE_PICKUP,
       getConfig().setReversed(true));
+    
+  public static final Trajectory FOUR_BALL_BACKUP_TWO = TrajectoryGenerator.generateTrajectory(
+    new Pose2d(MID_BALL_HUB_SIDE_PICKUP.getTranslation(), 
+        NomadMathUtil.getDirection(MID_BALL_HUB_SIDE_PICKUP, TERMINAL_OWN_BALL)),
+    List.of(),
+    pickup(new Pose2d(TERMINAL_OWN_BALL.getTranslation(), 
+    NomadMathUtil.getDirection(MID_BALL_HUB_SIDE_PICKUP, TERMINAL_OWN_BALL)),
+    new Rotation2d(),
+    Units.inchesToMeters(15) ), getConfig());
+
+    public static final Trajectory FOUR_BALL_RETURN = TrajectoryGenerator.generateTrajectory(
+        pickup(new Pose2d(TERMINAL_OWN_BALL.getTranslation(), 
+        NomadMathUtil.getDirection(MID_BALL_HUB_SIDE_PICKUP, TERMINAL_OWN_BALL)),
+        new Rotation2d(),
+        Units.inchesToMeters(15) ),
+        List.of(),
+        new Pose2d(MID_BALL_HUB_SIDE_PICKUP.getTranslation(), 
+            NomadMathUtil.getDirection(MID_BALL_HUB_SIDE_PICKUP, TERMINAL_OWN_BALL)),
+         getConfig().setReversed(true));
+
+    public static final Trajectory FOUR_BALL_BACKUP_ONE = TrajectoryGenerator.generateTrajectory(
+        MID_BALL_START_POSE,
+        List.of(),
+        FOUR_BALL_BACKUP_TWO.getInitialPose(),
+        getConfig());
 
 }
