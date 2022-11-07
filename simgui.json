@@ -53,6 +53,14 @@
         }
       },
       "/Shuffleboard/RobotContainer/field": {
+        "1mid-terminal": {
+          "arrows": false,
+          "style": "Track"
+        },
+        "BOT": {
+          "length": 0.7900000214576721,
+          "width": 0.7900000214576721
+        },
         "Robot": {
           "length": 0.7900000214576721,
           "width": 0.7900000214576721
@@ -66,9 +74,13 @@
           "style": "Track"
         },
         "right": 1781,
+        "start": {
+          "length": 0.7900000214576721,
+          "width": 0.7900000214576721
+        },
         "top": 45,
         "turret": {
-          "length": 3.0,
+          "length": 10.0,
           "width": 0.30000001192092896
         },
         "width": 16.459199905395508,
@@ -80,9 +92,6 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
-      "DrivebaseS": {
-        "open": true
-      },
       "RobotContainer": {
         "autoChooser": {
           "open": true
@@ -90,7 +99,10 @@
         "field": {
           "open": true
         },
-        "open": true
+        "open": true,
+        "turretS": {
+          "open": true
+        }
       },
       "SuperClimberS": {
         "LinearClimberS": {
@@ -102,6 +114,9 @@
         "TiltClimberS": {
           "open": true
         }
+      },
+      "TurretS": {
+        "open": true
       },
       "open": true
     },
@@ -140,21 +155,21 @@
           "series": [
             {
               "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/TurretS/Setpos"
+            },
+            {
+              "color": [
                 0.8666667342185974,
                 0.5176470875740051,
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/DrivebaseS/getLeftVelocity"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/DrivebaseS/leftVelocitySetpoint"
+              "id": "NT:/Shuffleboard/TurretS/turretPosition"
             }
           ]
         }

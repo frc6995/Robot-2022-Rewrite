@@ -22,6 +22,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Ben Su, Jeremiah Shue
  */
 public class IntakeS extends SubsystemBase implements Loggable {
+    @Log(methodName = "getOutputCurrent", name = "leadAmps")
     @Log(methodName = "getAppliedOutput", name = "inputVolts")
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,
             MotorType.kBrushless);

@@ -252,7 +252,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
         Units.inchesToMeters(6), // wheel radius is half of an encoder position unit.
         SIM_ENCODER_STD_DEV);
 		}
-    resetRobotPose(START_POSE);
+    resetRobotPose(Trajectories.FOUR_BALL_BACKUP_ONE.getInitialPose());
     
   }
 

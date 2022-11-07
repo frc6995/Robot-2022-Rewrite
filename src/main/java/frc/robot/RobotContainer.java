@@ -12,9 +12,11 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -91,11 +93,12 @@ public class RobotContainer implements Loggable {
 
   @Log
   SendableChooser<Command> autoChooser = new SendableChooser<Command>();
-
+  PowerDistribution pdp = new PowerDistribution(0, PowerDistribution.ModuleType.kCTRE);
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    
     // Startup order is important.
     // Subsystems first, because triggers and commands both depend on subsystems
     createSubsystems();
@@ -106,6 +109,8 @@ public class RobotContainer implements Loggable {
     // start the USB camera
     CameraServer.startAutomaticCapture();
     field.getObject("mid-terminal").setTrajectory(Trajectories.FOUR_BALL_BACKUP_TWO);
+    field.getObject("1mid-terminal").setTrajectory(Trajectories.FOUR_BALL_BACKUP_ONE);
+    field.getObject("start").setPose(Trajectories.FOUR_BALL_BACKUP_ONE.getInitialPose());
     // Configure the button bindings
 
   }
@@ -129,8 +134,8 @@ public class RobotContainer implements Loggable {
             driverController::getLeftX));
     midtakeS.setDefaultCommand(midtakeS.idleC());
 
-    autoChooser.setDefaultOption("2/3 Ball", AutoCommandFactory.twoBallAutoC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
-    autoChooser.addOption("4/5 Ball", AutoCommandFactory.fourBallAutoTrajectoryC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.addOption("2/3 Ball BAD", AutoCommandFactory.twoBallAutoC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.setDefaultOption("4/5 Ball", AutoCommandFactory.fourBallAutoTrajectoryC(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
 
   }
 
@@ -252,7 +257,10 @@ public class RobotContainer implements Loggable {
   }
 
   public void periodic() {
-
+    for (int i = 0; i < 16; i++) {
+      SmartDashboard.putNumber("pdp" + i, pdp.getCurrent(i));
+    }
+    
 
     if (DriverStation.isDisabled()) {
       LightS.getInstance().requestState(States.Disabled);

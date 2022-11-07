@@ -49,7 +49,7 @@ public class Trajectories {
   public static final Pose2d CARGO_RING_WALL_OWN_BALL = new Pose2d(7.579211, 0.298761, new Rotation2d());
   public static final Pose2d CARGO_RING_HANGAR_OWN_BALL = new Pose2d(4.960425, 6.217642, new Rotation2d());
   public static final Pose2d TERMINAL_OWN_BALL = new Pose2d(1.085474, 1.129107, new Rotation2d());
-  public static final Pose2d MID_BALL_START_POSE = new Pose2d(6.67436, 2.651410, Rotation2d.fromDegrees(-155.055217));
+  public static final Pose2d MID_BALL_START_POSE = new Pose2d(6.67436, 2.651410, Rotation2d.fromDegrees(-150));//Rotation2d.fromDegrees(-155.055217));
 
   public static final Pose2d FIVE_BALL_TARMAC_REVERSAL = new Pose2d(6.813, 2.715, Rotation2d.fromDegrees(-113));
   public static final Pose2d CARGO_RING_WALL_PICKUP = pickup(CARGO_RING_WALL_OWN_BALL, Rotation2d.fromDegrees(-62), Units.inchesToMeters(12));
@@ -121,7 +121,7 @@ public class Trajectories {
          getConfig().setReversed(true));
 
     public static final Trajectory FOUR_BALL_BACKUP_ONE = TrajectoryGenerator.generateTrajectory(
-        MID_BALL_START_POSE,
+        pickup(FOUR_BALL_BACKUP_TWO.getInitialPose(), new Rotation2d(), 2),
         List.of(),
         FOUR_BALL_BACKUP_TWO.getInitialPose(),
         getConfig());

@@ -58,7 +58,7 @@ public class AutoCommandFactory {
                
                 // run trajectory 
                 new ParallelDeadlineGroup(
-                    drivebaseS.ramseteC(Trajectories.MID_START_TO_MID_RING),
+                    drivebaseS.timedDriveC(0.2, 1.25),
                     intakeS.deployC()
                 ).andThen(new WaitCommand(0.5)).andThen(            
                     new ParallelCommandGroup(
@@ -67,8 +67,8 @@ public class AutoCommandFactory {
                     ).withTimeout(3.25)
                 ),
                 limelightS.ledsOnC(),
-                turretS.aimWithLimelight(()->limelightS.getFilteredXOffset() , ()->0),
-                shooterS.spinDistanceC(limelightS::getFilteredDistance)
+                turretS.aimWithLimelight(()->0 , ()->0),
+                shooterS.spinDistanceC(()->3.7)
                         
                 )
             )
@@ -80,7 +80,7 @@ public class AutoCommandFactory {
   MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
     return new InstantCommand(
         () -> {
-          drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
+          drivebaseS.resetRobotPose(Trajectories.FOUR_BALL_BACKUP_ONE.getInitialPose());
         })
     .andThen(
         new ParallelDeadlineGroup(
@@ -111,9 +111,20 @@ public class AutoCommandFactory {
                 midtakeS.shootC(shooterS.atTargetTrigger).withTimeout(2)
             ),
 
-            shooterS.spinDistanceC(limelightS::getFilteredDistance),
+            shooterS.spinDistanceC(
+                ()->NomadMathUtil.getDistance(
+                    new Transform2d(Trajectories.FOUR_BALL_BACKUP_TWO.getInitialPose(), Trajectories.HUB_CENTER_POSE)
+                )
+            ),
             limelightS.ledsOnC(),
-            turretS.aimWithLimelight(()->limelightS.getFilteredXOffset(), ()->0)
+            turretS.aimWithLimelight(()->{
+                var tail = Trajectories.FOUR_BALL_BACKUP_TWO.getInitialPose();
+                var head = Trajectories.HUB_CENTER_POSE;
+                var currentTurretFieldRotation = turretS.getRobotToTurretRotation().plus(Trajectories.FOUR_BALL_BACKUP_TWO.getInitialPose().getRotation());
+                var targetTurretFieldRotation = 
+                    new Rotation2d(head.getX()-tail.getX(), head.getY()-tail.getY()).plus(Rotation2d.fromDegrees(5)).unaryMinus();
+                return targetTurretFieldRotation.plus(currentTurretFieldRotation).getRadians();
+            }, ()->0)
         )
     );           
   }
